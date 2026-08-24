@@ -1,0 +1,678 @@
+/* ===========================================================
+   Two Years — a kraft, spiral-bound scrapbook
+   =========================================================== */
+
+:root{
+  --ground:    #1B1512;
+  --ground-hi: #2C221B;
+
+  --kraft:     #C4A277;   /* the cover board */
+  --kraft-dk:  #9E7E56;
+  --page:      #E7D8BC;   /* kraft-tinted page */
+  --page-2:    #DDCBA9;
+
+  --ink:       #33291F;
+  --ink-soft:  #806C55;
+  --hand:      #2E2A46;   /* pen */
+  --marker:    #241C16;   /* black marker */
+  --red:       #BE3A30;   /* the little hearts */
+  --gold:      #C9A227;   /* spiral brass */
+  --sage:      #7E8C67;
+
+  --f-marker: "Rock Salt", "Segoe Script", cursive;
+  --f-hand:   "Caveat", "Segoe Script", cursive;
+  --f-body:   "Newsreader", Georgia, serif;
+  --f-type:   "Courier Prime", "Courier New", monospace;
+
+  --pw: min(43vw, calc(80svh / 1.38), 430px);
+  --ph: calc(var(--pw) * 1.38);
+  --turn: 1.05s;
+
+  --torn: polygon(0 12%,4% 0,10% 9%,17% 1%,24% 10%,32% 2%,40% 11%,48% 2%,56% 10%,64% 1%,72% 11%,80% 2%,88% 10%,95% 1%,100% 9%,100% 90%,95% 100%,88% 91%,80% 99%,72% 90%,64% 99%,56% 90%,48% 99%,40% 89%,32% 99%,24% 90%,17% 99%,10% 90%,4% 100%,0 89%);
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+
+body{
+  margin:0;
+  display:grid; place-items:center;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--f-body);
+  line-height:1.6;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:""; position:fixed; inset:0; z-index:0;
+  background:
+    radial-gradient(760px 560px at 26% -8%, rgba(227,180,110,.18), transparent 62%),
+    repeating-linear-gradient(93deg, rgba(255,255,255,.012) 0 2px, transparent 2px 8px),
+    linear-gradient(158deg, var(--ground-hi), var(--ground) 58%, #120D0A);
+}
+body::after{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:radial-gradient(115% 88% at 32% 18%, transparent 42%, rgba(0,0,0,.62) 100%);
+}
+
+img{ display:block; max-width:100%; }
+button{ font:inherit; color:inherit; cursor:pointer; }
+:focus-visible{ outline:2.5px solid var(--gold); outline-offset:3px; }
+
+#stage{ position:relative; z-index:1; display:grid; justify-items:center; gap:1.3rem; }
+
+/* ===========================================================
+   Book shell
+   =========================================================== */
+.book{
+  position:relative;
+  width:calc(var(--pw) * 2); height:var(--ph);
+  perspective:2600px;
+  transition:transform var(--turn) cubic-bezier(.55,.03,.18,1);
+}
+.book.closed{ transform:translateX(-25%); }
+.book.ended{ transform:translateX(25%); }
+
+/* One shadow for the whole book — never one per leaf, or the
+   stack shows up as stepped dark blocks along the outer edge. */
+.book::before{
+  content:""; position:absolute; top:0; bottom:0; left:0; right:0;
+  box-shadow:0 24px 56px -22px rgba(0,0,0,.95);
+  transition:left var(--turn), right var(--turn);
+}
+.book.closed::before{ left:50%; }
+.book.ended::before{ right:50%; }
+
+.book__shadow{
+  position:absolute; left:4%; right:4%; bottom:-16px; height:30px;
+  background:radial-gradient(50% 100% at 50% 0%, rgba(0,0,0,.6), transparent 72%);
+  filter:blur(6px);
+}
+
+/* ---------- the spiral binding ------------------------- */
+.spiral{
+  position:absolute; top:0; bottom:0; left:50%; width:46px;
+  transform:translateX(-50%); z-index:1200; pointer-events:none;
+  display:flex; flex-direction:column; justify-content:space-evenly;
+  padding:2.5% 0;
+}
+.spiral i{
+  display:block; height:11px; border-radius:50%;
+  background:linear-gradient(180deg,#F2E2AE 0%, #C9A227 42%, #6E5620 62%, #A98A34 100%);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,.55),
+    inset 0 -2px 3px rgba(0,0,0,.4),
+    inset 0 2px 2px rgba(255,255,255,.55);
+}
+/* the punched holes the wire passes through */
+.spiral::before{
+  content:""; position:absolute; inset:0; z-index:-1;
+  background:radial-gradient(closest-side, rgba(0,0,0,.35), transparent 70%);
+  filter:blur(3px);
+}
+/* the spine sits at the 50% line whether the book is open or shut */
+
+/* ---------- leaves ------------------------------------- */
+.leaf{
+  position:absolute; top:0; left:50%;
+  width:50%; height:100%;
+  transform-origin:left center;
+  transform-style:preserve-3d;
+  transition:transform var(--turn) cubic-bezier(.55,.03,.18,1);
+}
+.leaf.flipped{ transform:rotateY(-180deg); }
+
+/* Only the two faces you can actually see may take a click.
+   Without this the hidden back of a leaf swallows every tap. */
+.leaf:not(.flipped) .face--back{ pointer-events:none; }
+.leaf.flipped .face:not(.face--back){ pointer-events:none; }
+
+.face{
+  position:absolute; inset:0;
+  backface-visibility:hidden;
+  overflow:hidden;
+  background:linear-gradient(178deg, var(--page), var(--page-2));
+}
+.face--back{ transform:rotateY(180deg); }
+
+.page{ position:absolute; inset:0; container-type:size; overflow:hidden; }
+/* paper tooth */
+.page::before{
+  content:""; position:absolute; inset:0; z-index:3; pointer-events:none;
+  background:
+    radial-gradient(78% 62% at 78% 8%, rgba(255,252,244,.45), transparent 62%),
+    repeating-linear-gradient(41deg, rgba(120,92,58,.035) 0 2px, transparent 2px 5px);
+}
+.page::after{
+  content:""; position:absolute; top:0; bottom:0; width:11%; z-index:3; pointer-events:none;
+}
+.page--recto::after{ left:0;  background:linear-gradient(90deg, rgba(58,36,16,.26), transparent); }
+.page--verso::after{ right:0; background:linear-gradient(270deg, rgba(58,36,16,.26), transparent); }
+
+.page__body{
+  position:absolute; inset:0; z-index:2;
+  padding:9cqh 10cqw 7cqh;
+  display:flex; flex-direction:column;
+  font-size:calc(3.3cqh * var(--s, 1));
+}
+.page--recto .page__body{ padding-left:13cqw; }   /* clear of the spiral */
+.page--verso .page__body{ padding-right:13cqw; }
+
+.page__folio{
+  position:absolute; bottom:3.2cqh; z-index:4;
+  font-family:var(--f-type); font-size:2cqh; letter-spacing:.2em;
+  color:rgba(128,108,85,.8);
+}
+.page--recto .page__folio{ right:8cqw; }
+.page--verso .page__folio{ left:8cqw; }
+
+/* ===========================================================
+   The kraft cover
+   =========================================================== */
+.face--cover, .face--endboard{
+  container-type:size;
+  background:
+    repeating-linear-gradient(64deg, rgba(120,88,50,.05) 0 3px, transparent 3px 7px),
+    repeating-linear-gradient(-27deg, rgba(255,255,255,.05) 0 2px, transparent 2px 6px),
+    linear-gradient(152deg, #D3B189, var(--kraft) 46%, var(--kraft-dk));
+  box-shadow:inset 0 0 0 1px rgba(90,62,34,.35), 0 30px 60px -24px rgba(0,0,0,.95);
+}
+.cover-inner{
+  position:absolute; inset:0; display:grid; align-content:center; justify-items:center;
+  padding:14cqh 11cqw; text-align:center; gap:2cqh;
+}
+.cover-kicker{
+  font-family:var(--f-type); font-size:2.1cqh; letter-spacing:.34em;
+  text-transform:uppercase; color:rgba(58,40,22,.6); margin:0;
+}
+.cover-lettering{
+  font-family:var(--f-marker); font-weight:400; margin:0;
+  font-size:5.6cqh; line-height:1.55; color:var(--marker);
+  transform:rotate(-4deg); max-width:24ch;
+}
+.cover-names{
+  font-family:var(--f-hand); font-size:5cqh; color:var(--red);
+  margin:0; transform:rotate(-1.5deg);
+}
+.cover-hint{
+  position:absolute; left:0; right:0; bottom:6cqh;
+  font-family:var(--f-type); font-size:1.9cqh; letter-spacing:.22em;
+  text-transform:uppercase; color:rgba(58,40,22,.45); text-align:center;
+}
+/* the little marker hearts scattered over the board */
+.hearts{ position:absolute; inset:0; pointer-events:none; }
+.hearts i{
+  position:absolute; width:2.6cqh; aspect-ratio:1;
+  background:var(--red);
+  -webkit-mask:var(--heart) center/contain no-repeat;
+          mask:var(--heart) center/contain no-repeat;
+  opacity:.85;
+}
+
+/* page edges of the closed book */
+.book .leaf:first-child::after{
+  content:""; position:absolute; top:1.5%; bottom:1.5%; right:-6px; width:10px;
+  background:repeating-linear-gradient(180deg,#E7D8BC 0 2px,#BCA47E 2px 4px);
+  border-radius:0 2px 2px 0; box-shadow:2px 0 8px rgba(0,0,0,.55);
+}
+.book.opened .leaf:first-child::after{ opacity:0; transition:opacity .3s; }
+
+/* ---------- turn affordance ---------------------------- */
+.edge{
+  position:absolute; top:0; bottom:0; width:9%; z-index:40;
+  display:grid; place-items:center; pointer-events:none;
+  font-family:var(--f-body); font-size:2rem; color:rgba(247,241,227,0);
+  transition:color .3s;
+}
+.edge--prev{ left:0; } .edge--next{ right:0; }
+.book.hint-next .edge--next span,
+.book.hint-prev .edge--prev span{ color:rgba(247,241,227,.5); }
+.book.closed .edge--prev{ display:none; }
+
+/* ---------- hud ---------------------------------------- */
+.hud{
+  display:flex; align-items:center; gap:1.2rem;
+  font-family:var(--f-type); font-size:.7rem; letter-spacing:.2em;
+  text-transform:uppercase; color:rgba(247,241,227,.4);
+}
+.hud button{
+  background:none; border:1px solid rgba(247,241,227,.2); color:rgba(247,241,227,.6);
+  width:2.2rem; height:2.2rem; border-radius:50%; line-height:1; font-size:1.1rem;
+  transition:border-color .2s, color .2s;
+}
+.hud button:hover:not(:disabled){ border-color:var(--gold); color:var(--gold); }
+.hud button:disabled{ opacity:.25; cursor:default; }
+.hud__folio{ min-width:11ch; text-align:center; }
+
+/* ===========================================================
+   Page furniture — everything scales off .page__body
+   =========================================================== */
+.eyebrow{
+  font-family:var(--f-type); font-size:.62em; letter-spacing:.22em;
+  text-transform:uppercase; color:var(--ink-soft); margin:0 0 1.6em;
+}
+.h{
+  font-family:var(--f-hand); font-weight:600; margin:0 0 .35em;
+  font-size:2.6em; line-height:1.1; color:var(--marker);
+}
+.page p{ margin:0 0 .9em; }
+.hand{ font-family:var(--f-hand); font-size:1.4em; line-height:1.3; color:var(--red); }
+.spacer{ flex:1; }
+
+/* ---------- taped photos -------------------------------- */
+.taped{ position:relative; width:100%; height:100%; }
+.taped::before, .taped::after{
+  content:""; position:absolute; z-index:6;
+  width:22cqw; height:5.4cqh;
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,.34) 0 5px, transparent 5px 11px),
+    var(--tape, var(--gold));
+  opacity:.8; box-shadow:0 2px 5px rgba(0,0,0,.22);
+  clip-path:var(--torn);
+}
+.taped::before{ top:-2.2cqh; left:-3.5cqw; transform:rotate(-9deg); }
+.taped::after{ bottom:-2.2cqh; right:-3.5cqw; transform:rotate(-9deg); }
+.taped--red{ --tape:var(--red); }
+.taped--sage{ --tape:var(--sage); }
+
+.polaroid{
+  position:relative; margin:0; background:#FFFDF7;
+  padding:1.6cqh 1.6cqh 5.6cqh;
+  box-shadow:0 10px 20px -12px rgba(0,0,0,.7);
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.polaroid img, .polaroid .ph{
+  width:100%; height:100%; object-fit:cover; background:#E2D6BE;
+  filter:saturate(.95) contrast(1.03);
+}
+.polaroid figcaption{
+  position:absolute; left:0; right:0; bottom:1.3cqh; text-align:center;
+  font-family:var(--f-hand); font-size:3.2cqh; color:var(--ink-soft);
+}
+.polaroid[data-full]{ cursor:zoom-in; }
+.polaroid[data-full]:hover{ transform:translateY(-4px); box-shadow:0 18px 30px -14px rgba(0,0,0,.75); }
+.ph{
+  display:grid; place-items:center; text-align:center; padding:1cqh;
+  border:1.5px dashed rgba(128,108,85,.5);
+  font-family:var(--f-type); font-size:2cqh; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink-soft); line-height:1.9;
+}
+.photo-page{ flex:1; display:grid; place-items:center; }
+.photo-page .polaroid{ width:100%; height:100%; transform:rotate(-1.4deg); }
+.photo-page .polaroid img, .photo-page .polaroid .ph{ height:100%; }
+
+.grid4{ flex:1; display:grid; grid-template-columns:1fr 1fr; gap:4cqh 4cqw; align-content:center; }
+.grid4 .polaroid:nth-child(odd){ transform:rotate(-1.6deg); }
+.grid4 .polaroid:nth-child(even){ transform:rotate(1.4deg); }
+.grid4 .polaroid img, .grid4 .polaroid .ph{ aspect-ratio:1; height:auto; }
+
+/* ---------- two dates ---------------------------------- */
+.dates{ flex:1; display:flex; flex-direction:column; justify-content:center; gap:4cqh; }
+.date-row{ text-align:center; }
+.date-row span{
+  display:block; font-family:var(--f-type); font-size:.6em;
+  letter-spacing:.22em; text-transform:uppercase; color:var(--ink-soft);
+}
+.date-row b{ display:block; font-family:var(--f-hand); font-weight:600; font-size:2.3em; line-height:1.15; color:var(--marker); }
+.date-row i{ font-style:normal; font-family:var(--f-hand); font-size:1.2em; color:var(--red); }
+.date-join{
+  display:grid; place-items:center; gap:1.2cqh;
+  font-family:var(--f-type); font-size:.6em; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--ink-soft);
+}
+.date-join::before{ content:""; width:1px; height:5cqh; background:rgba(128,108,85,.55); }
+
+/* ---------- bookplate ---------------------------------- */
+.bookplate{
+  flex:1; display:grid; place-content:center; text-align:center;
+  border:1px dashed rgba(128,108,85,.55); margin:4cqh 0; padding:6cqh 5cqw;
+}
+.bookplate span{ font-family:var(--f-type); font-size:.62em; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-soft); }
+.bookplate b{ display:block; font-family:var(--f-hand); font-weight:600; font-size:3.6em; color:var(--hand); line-height:1.2; }
+.bookplate i{ display:block; font-style:normal; font-size:.8em; color:var(--ink-soft); margin-top:1.6cqh; }
+
+/* ---------- writing pages ------------------------------ */
+.note{ flex:1; }
+.note p{ line-height:1.75; }
+.note p:last-child{ margin-bottom:0; }
+
+/* ---------- envelope + letter -------------------------- */
+.env-page{ flex:1; display:grid; place-items:center; }
+.envelope{ width:100%; perspective:800px; }
+.env__body{
+  position:relative; aspect-ratio:8/5; cursor:pointer;
+  background:linear-gradient(160deg,#EFE0C2,#DBC69F);
+  box-shadow:0 14px 28px -16px rgba(0,0,0,.8), inset 0 0 0 1px rgba(255,255,255,.35);
+}
+.env__flap{
+  position:absolute; top:0; left:0; right:0; height:62%; z-index:3;
+  background:linear-gradient(175deg,#E6D5B0,#CFB88E);
+  clip-path:polygon(0 0,100% 0,50% 100%);
+  transform-origin:top center; transition:transform .75s cubic-bezier(.5,.02,.2,1);
+}
+.env__pocket{
+  position:absolute; inset:0; z-index:2;
+  background:linear-gradient(200deg,#E8D8B4,#D5BF97);
+  clip-path:polygon(0 100%,50% 42%,100% 100%);
+}
+.env__seal{
+  position:absolute; top:52%; left:50%; z-index:4;
+  width:16cqh; height:16cqh; transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #D1584E, #8E2A22 72%);
+  box-shadow:0 4px 10px rgba(0,0,0,.4), inset 0 -3px 8px rgba(0,0,0,.35);
+  display:grid; place-items:center;
+  font-family:var(--f-hand); font-weight:600; color:#F6E8D0; font-size:7cqh;
+  transition:opacity .35s, transform .5s;
+}
+.envelope.open .env__flap{ transform:rotateX(-172deg); }
+.envelope.open .env__seal{ opacity:0; transform:translate(-50%,-50%) scale(.4); }
+.env__hint{ text-align:center; margin-top:3cqh; }
+
+.letter[hidden]{ display:none; }      /* the attribute alone loses to display:flex */
+.letter{
+  flex:1; display:flex; flex-direction:column; justify-content:center;
+  opacity:0; transform:translateY(2cqh); transition:opacity .7s, transform .7s;
+}
+.letter.show{ opacity:1; transform:none; }
+.letter__wait{
+  flex:1; display:grid; place-items:center; text-align:center;
+  font-family:var(--f-type); font-size:.62em; letter-spacing:.2em;
+  text-transform:uppercase; color:rgba(128,108,85,.7); transition:opacity .4s;
+}
+.letter__wait.gone{ opacity:0; }
+.letter p{ font-family:var(--f-hand); font-size:1.42em; line-height:1.45; color:var(--hand); }
+.letter .sig{ color:var(--red); text-align:right; }
+
+/* ---------- DIY: pull-out card ------------------------- */
+.pull-page{ flex:1; display:grid; place-items:center; }
+.pullcard{ position:relative; width:86%; aspect-ratio:1/1.24; }
+.pullcard::after{
+  content:""; position:absolute; left:0; right:0; top:34%; height:2px; z-index:3;
+  background:rgba(128,108,85,.4);
+}
+.pullcard__card{
+  position:absolute; left:9%; right:9%; top:30%; height:66%; z-index:1;
+  background:linear-gradient(#FFFCF3,#F3E9D5);
+  box-shadow:0 6px 16px -8px rgba(0,0,0,.6);
+  /* the message sits at the top, so it is what emerges from the slot */
+  display:grid; align-content:start; justify-items:center; text-align:center; padding:5% 9% 0;
+  transition:transform .45s cubic-bezier(.3,1.1,.4,1);
+  will-change:transform;
+}
+.pullcard__card p{
+  margin:0; font-family:var(--f-hand); font-size:1.35em; line-height:1.35; color:var(--hand);
+}
+.pullcard__pocket{
+  position:absolute; inset:0; z-index:2;
+  background:linear-gradient(158deg,#FFFDF6,#F0E5CF);
+  box-shadow:0 12px 26px -14px rgba(0,0,0,.65), inset 0 0 0 1px rgba(128,108,85,.25);
+  clip-path:polygon(0 34%,100% 34%,100% 100%,0 100%);
+  pointer-events:none;
+}
+.pullcard__tab{
+  position:absolute; left:50%; top:34%; z-index:4;
+  transform:translate(-50%,-50%);
+  font-family:var(--f-type); font-size:.58em; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--ink-soft); background:#FFFDF6; padding:.5em 1em;
+  box-shadow:0 2px 6px rgba(0,0,0,.18);
+  pointer-events:none;
+}
+.pullcard.out .pullcard__card{ transform:translateY(-45%); }
+.pullcard.out .pullcard__tab{ opacity:0; transition:opacity .3s; }
+.pullcard__grab{
+  position:absolute; left:9%; right:9%; top:6%; height:36%; z-index:5;
+  cursor:grab; touch-action:none;
+}
+.pullcard__grab:active{ cursor:grabbing; }
+
+/* ---------- DIY: scratch card -------------------------- */
+.scratch-page{ flex:1; display:grid; place-items:center; }
+.scratch{
+  position:relative; width:100%; aspect-ratio:5/3.4;
+  background:linear-gradient(150deg,#F7EFDD,#E9DCC0);
+  display:grid; place-items:center; text-align:center; padding:4cqh;
+  box-shadow:inset 0 0 0 1px rgba(128,108,85,.4), 0 12px 24px -14px rgba(0,0,0,.7);
+}
+.scratch__msg{ font-family:var(--f-hand); font-weight:600; font-size:1.7em; line-height:1.25; max-width:20ch; color:var(--marker); }
+.scratch canvas{ position:absolute; inset:0; width:100%; height:100%; cursor:grab; touch-action:none; transition:opacity .6s; }
+.scratch.done canvas{ opacity:0; pointer-events:none; }
+
+/* ---------- DIY: jar ----------------------------------- */
+.jar-page{ flex:1; display:grid; grid-template-columns:34% 1fr; gap:4cqw; align-items:center; }
+.jar{ width:100%; filter:drop-shadow(0 8px 14px rgba(0,0,0,.25)); }
+.slip{
+  min-height:24cqh; display:grid; align-items:center;
+  background:linear-gradient(#FFFCF2,#F1E6CE);
+  padding:3.4cqh 3cqw;
+  box-shadow:0 10px 20px -12px rgba(0,0,0,.6);
+  font-family:var(--f-hand); font-size:1.4em; line-height:1.3; color:var(--hand);
+  clip-path:polygon(0 4%,6% 0,14% 4%,23% 0,32% 4%,41% 0,50% 4%,59% 0,68% 4%,77% 0,86% 4%,94% 0,100% 4%,100% 96%,94% 100%,86% 96%,77% 100%,68% 96%,59% 100%,50% 96%,41% 100%,32% 96%,23% 100%,14% 96%,6% 100%,0 96%);
+}
+.slip.pop{ animation:pop .45s cubic-bezier(.2,1.25,.4,1); }
+@keyframes pop{ from{ transform:translateY(3cqh) rotate(4deg); opacity:0; } to{ transform:none; opacity:1; } }
+.btn{
+  margin-top:3cqh; background:var(--red); border:none; color:#FCF4E6;
+  font-family:var(--f-type); font-size:.6em; letter-spacing:.18em; text-transform:uppercase;
+  padding:1.5cqh 3cqw; box-shadow:0 5px 12px -6px rgba(0,0,0,.7);
+  transition:background .2s, transform .2s;
+}
+.btn:hover{ background:#9E2B23; transform:translateY(-1px); }
+
+/* ---------- cut-out phrase stickers -------------------- */
+.stickers{ flex:1; display:flex; flex-wrap:wrap; align-content:center; justify-content:center; gap:3cqh 3cqw; }
+.stickers span{
+  display:inline-block; padding:.35em .7em;
+  background:#FCF6E7; box-shadow:0 3px 8px -3px rgba(0,0,0,.45);
+  font-size:1.15em; color:var(--marker);
+  clip-path:var(--torn);
+}
+.stickers span:nth-child(3n){ font-family:var(--f-hand); font-size:1.5em; color:var(--red); transform:rotate(-2.5deg); }
+.stickers span:nth-child(3n+1){ font-family:var(--f-body); font-style:italic; transform:rotate(1.5deg); }
+.stickers span:nth-child(3n+2){ font-family:var(--f-type); font-size:.85em; letter-spacing:.06em; transform:rotate(-1deg); background:#F0E4C6; }
+
+/* ---------- record card -------------------------------- */
+.record{
+  flex:1; align-self:center; width:100%;
+  background-image:
+    repeating-linear-gradient(180deg, transparent 0 6.2cqh, rgba(126,140,103,.3) 6.2cqh calc(6.2cqh + 1px)),
+    linear-gradient(#FDFBF3,#F2EADA);
+  border-top:2px solid var(--red);
+  padding:4cqh 4cqw; box-shadow:0 10px 22px -14px rgba(0,0,0,.6);
+}
+.record dl{ margin:0; display:grid; grid-template-columns:auto 1fr; gap:0 3cqw; }
+.record dt{ font-family:var(--f-type); font-size:.6em; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft); line-height:6.2cqh; }
+.record dd{ margin:0; font-family:var(--f-hand); font-size:1.3em; line-height:6.2cqh; color:var(--hand); }
+
+/* ---------- last page ---------------------------------- */
+.outro{ flex:1; display:grid; place-content:center; text-align:center; }
+.outro .heart{ width:8cqh; margin:3cqh auto 0; color:var(--red); }
+
+/* ---------- lightbox ----------------------------------- */
+.lightbox{ position:fixed; inset:0; z-index:90; display:none; place-items:center; background:rgba(10,7,5,.94); padding:2rem; }
+.lightbox.show{ display:grid; }
+.lightbox figure{ margin:0; }
+.lightbox img{ max-height:80vh; max-width:min(880px,92vw); border:10px solid #FFFDF7; box-shadow:0 30px 60px rgba(0,0,0,.8); }
+.lightbox figcaption{ text-align:center; margin-top:1rem; font-family:var(--f-hand); font-size:1.4rem; color:#F0E4CC; }
+.lightbox .close{ position:absolute; top:1.2rem; right:1.4rem; background:none; border:none; color:#F0E4CC; font-size:2rem; line-height:1; }
+
+/* ===========================================================
+   Phones — one page at a time
+   =========================================================== */
+@media (max-width:820px){
+  :root{ --pw: min(88vw, calc(74svh / 1.38)); --ph: calc(var(--pw) * 1.38); }
+  .book{ width:var(--pw); }
+  .book.closed, .book.ended{ transform:none; }
+  .leaf{ left:0; width:100%; }
+  .leaf.flipped{ transform:rotateY(-165deg); opacity:0; }
+  .page::after{ display:none; }
+  .page--recto .page__body,
+  .page--verso .page__body{ padding-left:16cqw; padding-right:8cqw; }
+  .spiral, .book.closed .spiral, .book.ended .spiral{ left:8px; transform:none; width:34px; }
+  .spiral i{ height:9px; }
+  .jar-page{ grid-template-columns:1fr; justify-items:center; text-align:center; }
+  .jar{ width:34%; }
+  .edge{ display:none; }
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important; animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+  }
+}
+
+/* ===========================================================
+   DIY: lift the flap
+   =========================================================== */
+.flap-page{ flex:1; display:grid; place-items:center; }
+.flapbox{ position:relative; width:100%; aspect-ratio:4/3.6; perspective:1100px; }
+.flapbox__under{
+  position:absolute; inset:0; background:#FFFDF7; padding:1.6cqh;
+  display:grid; grid-template-rows:1fr auto; gap:1.4cqh;
+  box-shadow:inset 0 0 0 1px rgba(128,108,85,.3);
+}
+.flapbox__under img, .flapbox__under .ph{ width:100%; height:100%; object-fit:cover; background:#E2D6BE; }
+.flapbox__msg{ font-family:var(--f-hand); font-size:1.15em; text-align:center; color:var(--hand); line-height:1.25; }
+.flapbox__flap{
+  position:absolute; inset:0; z-index:2; cursor:pointer;
+  transform-origin:top center; backface-visibility:hidden;
+  transition:transform .8s cubic-bezier(.5,.02,.2,1);
+  background:
+    repeating-linear-gradient(64deg, rgba(120,88,50,.05) 0 3px, transparent 3px 7px),
+    linear-gradient(152deg, #D3B189, var(--kraft) 48%, var(--kraft-dk));
+  box-shadow:0 10px 20px -10px rgba(0,0,0,.65), inset 0 0 0 1px rgba(90,62,34,.3);
+  display:grid; place-items:center;
+}
+.flapbox__flap span{
+  font-family:var(--f-marker); font-size:.85em; color:var(--marker);
+  transform:rotate(-3.5deg); text-align:center; padding:0 8%;
+}
+.flapbox.open .flapbox__flap{ transform:rotateX(-162deg); }
+/* the tape holding the hinge */
+.flapbox::before{
+  content:""; position:absolute; z-index:4; top:-2.4cqh; left:50%;
+  width:26cqw; height:5.4cqh; transform:translateX(-50%) rotate(-2deg);
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,.34) 0 5px, transparent 5px 11px),
+    var(--red);
+  opacity:.82; clip-path:var(--torn); box-shadow:0 2px 5px rgba(0,0,0,.22);
+}
+
+/* ===========================================================
+   DIY: the wheel
+   =========================================================== */
+.wheel-page{ flex:1; display:grid; grid-template-rows:1fr auto; place-items:center; gap:2cqh; }
+.wheel{ position:relative; width:min(100%, 62cqh); aspect-ratio:1; }
+.wheel__disc{
+  position:absolute; inset:0; border-radius:50%; cursor:grab; touch-action:none;
+  background:
+    repeating-conic-gradient(from 0deg, rgba(128,108,85,.09) 0 15deg, transparent 15deg 30deg),
+    radial-gradient(circle, #FBF5E6 38%, #EFE3C9 70%, #DFCFAC 100%);
+  box-shadow:0 8px 20px -10px rgba(0,0,0,.6), inset 0 0 0 1px rgba(128,108,85,.4);
+  transition:transform .45s cubic-bezier(.2,1.1,.4,1);
+}
+.wheel__disc:active{ cursor:grabbing; }
+.wheel__disc i{
+  position:absolute; inset:0; display:flex; justify-content:center;
+  padding-top:5%; font-style:normal;
+  font-family:var(--f-type); font-size:.62em; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--ink-soft);
+}
+.wheel__disc i.on{ color:var(--red); font-weight:700; }
+.wheel__hub{
+  position:absolute; left:50%; top:50%; width:16%; aspect-ratio:1;
+  transform:translate(-50%,-50%); border-radius:50%; z-index:2;
+  background:radial-gradient(circle at 34% 30%, #D1584E, #8E2A22 72%);
+  box-shadow:0 3px 8px rgba(0,0,0,.45);
+}
+.wheel__mark{
+  position:absolute; left:50%; top:-1.6cqh; transform:translateX(-50%);
+  width:0; height:0; z-index:3;
+  border-left:1.5cqh solid transparent; border-right:1.5cqh solid transparent;
+  border-top:2.4cqh solid var(--red);
+}
+.wheel__out{
+  margin:0; text-align:center; font-family:var(--f-hand);
+  font-size:1.35em; line-height:1.3; color:var(--hand); min-height:3.6em;
+}
+
+/* ===========================================================
+   DIY: the film strip
+   =========================================================== */
+.film-page{ flex:1; display:grid; place-items:center; }
+.film{
+  position:relative; width:100%; overflow:hidden;
+  background:#191410; padding:3.4cqh 0;
+  box-shadow:0 10px 22px -12px rgba(0,0,0,.8);
+  cursor:grab; touch-action:pan-y;
+}
+.film:active{ cursor:grabbing; }
+/* sprocket holes */
+.film::before, .film::after{
+  content:""; position:absolute; left:0; right:0; height:2.4cqh; z-index:2;
+  background:repeating-linear-gradient(90deg, transparent 0 1.4cqh, #E8DCC4 1.4cqh 3cqh);
+  opacity:.85;
+}
+.film::before{ top:.5cqh; } .film::after{ bottom:.5cqh; }
+.film__reel{ display:flex; gap:1.4cqh; will-change:transform; }
+.film__frame{
+  flex:0 0 42%; aspect-ratio:1/1; background:#2A211A;
+  outline:1px solid rgba(232,220,196,.25); outline-offset:-1px;
+}
+.film__frame img, .film__frame .ph{ width:100%; height:100%; object-fit:cover; }
+.film__frame .ph{ border:none; color:rgba(232,220,196,.5); font-size:1.6cqh; }
+
+/* ===========================================================
+   DIY: the fold-out
+   =========================================================== */
+.foldout-page{ flex:1; display:grid; grid-template-rows:1fr auto; place-items:center; gap:2cqh; }
+.foldout{ display:flex; align-items:stretch; width:100%; height:70%; }
+.foldout__panel{
+  flex:1 1 0; min-width:0; display:grid; place-items:center; text-align:center;
+  padding:2cqh 1.2cqw;
+  background:linear-gradient(#FFFCF3,#F1E7D2);
+  box-shadow:inset -1px 0 0 rgba(128,108,85,.4), 0 8px 16px -10px rgba(0,0,0,.5);
+  font-family:var(--f-hand); font-size:1.1em; line-height:1.25; color:var(--hand);
+  transform-origin:left center; transform:perspective(700px) rotateY(-88deg);
+  opacity:0; transition:transform .5s cubic-bezier(.4,.02,.2,1), opacity .35s;
+}
+.foldout__panel:first-child{ transform:none; opacity:1; }
+.foldout.open .foldout__panel{ transform:none; opacity:1; }
+.foldout.open .foldout__panel:nth-child(2){ transition-delay:.12s; }
+.foldout.open .foldout__panel:nth-child(3){ transition-delay:.26s; }
+.foldout.open .foldout__panel:nth-child(4){ transition-delay:.4s; }
+.foldout.open .foldout__panel:nth-child(5){ transition-delay:.54s; }
+
+/* ===========================================================
+   DIY: promises you can tick
+   =========================================================== */
+.promises{ flex:1; display:flex; flex-direction:column; justify-content:center; gap:2.4cqh; }
+.promise{
+  display:grid; grid-template-columns:auto 1fr; gap:2.4cqw; align-items:start;
+  background:none; border:none; padding:0; text-align:left; cursor:pointer;
+  font-family:var(--f-hand); font-size:1.25em; line-height:1.25; color:var(--hand);
+}
+.promise__box{
+  position:relative; width:1.5em; height:1.5em; flex:none;
+  border:2px solid rgba(128,108,85,.75); border-radius:2px; background:#FFFCF2;
+}
+.promise__box svg{
+  position:absolute; inset:-22%; width:144%; height:144%;
+  stroke:var(--red); stroke-width:3.2; fill:none;
+  stroke-linecap:round; stroke-linejoin:round;
+  stroke-dasharray:32; stroke-dashoffset:32;
+  transition:stroke-dashoffset .35s ease;
+}
+.promise[aria-pressed="true"] .promise__box svg{ stroke-dashoffset:0; }
+.promise[aria-pressed="true"] .promise__text{ color:var(--ink-soft); text-decoration:line-through; text-decoration-color:rgba(190,58,48,.6); }
+
+/* ===========================================================
+   Dragging a page or a DIY must never paint a text selection
+   across the paper.
+   =========================================================== */
+.book{ -webkit-user-select:none; user-select:none; }
+.wheel, .film, .pullcard, .flapbox, .scratch, .foldout, .promise, .slip, .stickers{
+  -webkit-user-select:none; user-select:none;
+}
