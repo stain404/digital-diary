@@ -769,7 +769,10 @@
     if (!body) return;
     const stage = $('#envStage');
     const clear = () => {
-      if (stage) { stage.classList.add('gone'); setTimeout(() => { stage.hidden = true; }, 420); }
+      if (stage) {
+        stage.classList.add('gone');
+        setTimeout(() => { stage.hidden = true; fitText(); }, 420);
+      }
     };
     const open = () => {
       sealBroken = true;
@@ -925,6 +928,12 @@
   function fitText() {
     requestAnimationFrame(() => {
       $$('.page__body[data-fit]', host).forEach((b) => {
+        // The envelope shares this page but is on its way out; measuring the
+        // letter around it would shrink the letter permanently.
+        if (b.querySelector('.env-stage:not([hidden])')) {
+          b.style.setProperty('--s', 1);
+          return;
+        }
         let s = 1;
         b.style.setProperty('--s', s);
         while (b.scrollHeight > b.clientHeight + 2 && s > 0.55) {

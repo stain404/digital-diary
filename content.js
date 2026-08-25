@@ -243,21 +243,21 @@ And you've taught me how much happiness can come from the smallest things. A hug
 
   /* --- taped-in photos, 4 to a page ------------------- */
   gallery: [
-    { src: "images/05.jpg", caption: "" },
-    { src: "images/06.jpg", caption: "" },
-    { src: "images/07.jpg", caption: "" },
-    { src: "images/08.jpg", caption: "" },
-    { src: "images/09.jpg", caption: "" },
-    { src: "images/10.jpg", caption: "" },
-    { src: "images/11.jpg", caption: "" },
-    { src: "images/12.jpg", caption: "" },
+    { src: "images/p03.jpeg", caption: "" },
+    { src: "images/p07.jpeg", caption: "" },
+    { src: "images/p05.jpeg", caption: "" },
+    { src: "images/p08.jpeg", caption: "" },
+    { src: "images/p14.jpeg", caption: "" },
+    { src: "images/p06.jpeg", caption: "" },
+    { src: "images/p01.jpeg", caption: "" },
+    { src: "images/p11.jpeg", caption: "" },
   ],
 
   /* --- DIY: the pull-out card ------------------------- */
   pullCard: {
     hint: "Pull the card out",
     front: "Pull me",
-    photo: "images/19.jpg",
+    photo: "images/p04.jpeg",
     message: "and suddenly it was all about you",
   },
 
@@ -278,23 +278,23 @@ And you've taught me how much happiness can come from the smallest things. A hug
   filmTitle: "The negatives",
   filmHint: "Drag the strip.",
   film: [
-    { src: "images/14.jpg", caption: "" },
-    { src: "images/15.jpg", caption: "" },
-    { src: "images/16.jpg", caption: "" },
-    { src: "images/17.jpg", caption: "" },
-    { src: "images/18.jpg", caption: "" },
+    { src: "images/p09.jpeg", caption: "" },
+    { src: "images/p10.jpeg", caption: "" },
+    { src: "images/p02.jpeg", caption: "" },
+    { src: "images/p13.jpeg", caption: "" },
+    { src: "images/p12.jpeg", caption: "" },
   ],
 
   /* --- DIY: the fold-out ------------------------------ */
   foldout: {
-    title: "Fold-out",
+    title: "Ten years from now",
     hint: "Unfold it",
     button: "Unfold",
     panels: [
-      "[Panel one.]",
-      "[Panel two.]",
-      "[Panel three.]",
-      "[The last panel. Land it.]",
+      "You'll still put your tongue out when you're concentrating.",
+      "I'll still ask what you're thinking.",
+      "We'll still argue about something stupid.",
+      "And I'll still be choosing you.",
     ],
   },
 

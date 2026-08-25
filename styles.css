@@ -160,12 +160,13 @@ button{ font:inherit; color:inherit; cursor:pointer; }
 .page--verso .page__body{ padding-right:13cqw; }
 
 .page__folio{
-  position:absolute; bottom:3.2cqh; z-index:4;
+  position:absolute; top:4cqh; z-index:4;
   font-family:var(--f-type); font-size:2cqh; letter-spacing:.2em;
   color:rgba(128,108,85,.8);
 }
+/* top right of each page; the left page keeps clear of the spiral */
 .page--recto .page__folio{ right:8cqw; }
-.page--verso .page__folio{ left:8cqw; }
+.page--verso .page__folio{ right:14cqw; }
 
 /* ===========================================================
    The kraft cover
