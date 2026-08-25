@@ -531,7 +531,7 @@ button{ font:inherit; color:inherit; cursor:pointer; }
 .flapbox{ position:relative; width:100%; aspect-ratio:4/3.6; perspective:1100px; }
 .flapbox__under{
   position:absolute; inset:0; background:#FFFDF7; padding:1.6cqh;
-  display:grid; grid-template-rows:1fr auto; gap:1.4cqh;
+  display:grid; place-items:center;
   box-shadow:inset 0 0 0 1px rgba(128,108,85,.3);
 }
 .flapbox__under img, .flapbox__under .ph{ width:100%; height:100%; object-fit:cover; background:#E2D6BE; }
@@ -655,3 +655,6 @@ button{ font:inherit; color:inherit; cursor:pointer; }
 /* crayon flowers on the flap */
 .crayon{ position:absolute; top:8%; left:50%; transform:translateX(-50%); width:74%; }
 .flapbox__flap span{ position:relative; margin-top:22%; }
+
+/* the bouquet behind the flap */
+.crayon--bouquet{ position:static; transform:none; width:70%; height:auto; }

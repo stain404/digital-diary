@@ -272,8 +272,6 @@ And you've taught me how much happiness can come from the smallest things. A hug
   flap: {
     hint: "Lift the flap",
     front: "for my favourite girl, I love you",
-    photo: "images/13.jpg",
-    message: "",
   },
 
   /* --- DIY: the film strip ---------------------------- */
@@ -304,14 +302,13 @@ And you've taught me how much happiness can come from the smallest things. A hug
   reasonsTitle: "The jar",
   reasonsHint: "Pull one out.",
   reasons: [
-    "[A reason. Small and specific beats big and general.]",
-    "[Something she does with her face.]",
-    "[Something she said once that you didn't forget.]",
-    "[Something she's better at than you.]",
-    "[Something only you would notice.]",
-    "[The thing she does when she thinks nobody's watching.]",
-    "[A habit of hers you'd miss immediately.]",
-    "[The last one. Make it land.]",
+    "The way you act nonchalant when all you want is attention.",
+    "The way you have your tongue out when you're concentrating.",
+    "How you told me that I am family to you.",
+    "You're definitely smarter than me.",
+    "The way your eyes light up when you're excited.",
+    "Your tantrums.",
+    "You'll always be my favourite person.",
   ],
 
   /* --- cut-out phrases -------------------------------- */
@@ -325,29 +322,26 @@ And you've taught me how much happiness can come from the smallest things. A hug
   promisesTitle: "Promises for year three",
   promisesHint: "Tick them off as I keep them.",
   promises: [
-    "[Something small you'll actually do.]",
-    "[Something she's asked you for before.]",
-    "[Something you've been putting off.]",
-    "[Somewhere you'll take her.]",
-    "[Something you'll stop doing.]",
-    "[The big one.]",
+    "Help you with your chores.",
+    "Learn to give you a better massage.",
+    "Stop overthinking everything and letting small things turn into bigger problems between us.",
+    "Build a life with you where you never have to question whether I'm choosing you.",
+    "Make a memory together that we'll still talk about years from now.",
   ],
 
   /* --- the typed record card -------------------------- */
   recordTitle: "The record",
   firsts: [
     { label: "First met",  value: "3 November 2023" },
+    { label: "First date", value: "16 November 2023" },
     { label: "Together",   value: "25 August 2024" },
-    { label: "First date", value: "[where]" },
-    { label: "Her order",  value: "[what she always gets]" },
-    { label: "Our song",   value: "[title]" },
-    { label: "First trip", value: "[where]" },
+    { label: "Our song",   value: "Brooklyn Baby — Lana Del Rey" },
   ],
 
   /* --- the last page ---------------------------------- */
   outro: {
-    title: "To be continued",
-    body: "[Short. Two or three lines. Then stop.]",
-    signoff: "Happy two years, Bisma.",
+    title: "Always and forever",
+    body: "",
+    signoff: "",
   },
 };

@@ -22,7 +22,8 @@
   const daysSince = (iso) =>
     Math.max(0, Math.floor((Date.now() - new Date(iso + 'T00:00:00')) / 86400000));
   const paras = (text) => String(text || '').split(/\n\s*\n/)
-    .map((p) => `<p>${esc(p.trim())}</p>`).join('');
+    .map((p) => p.trim()).filter(Boolean)
+    .map((p) => `<p>${esc(p)}</p>`).join('');
   const chunk = (arr, n) => arr.reduce((out, x, i) =>
     (i % n ? out[out.length - 1].push(x) : out.push([x]), out), []);
 
@@ -110,6 +111,41 @@
           ${bloom(46, 44, 1, '#BE3A30', '#E3A32B')}
           ${bloom(112, 30, 0.78, '#D98A94', '#E3A32B')}
           ${bloom(170, 50, 0.92, '#E3A32B', '#BE3A30')}
+        </g>
+      </svg>`;
+  }
+
+  /* The bouquet the flap opens onto: blooms gathered on stems that meet at
+     a ribbon, wrapped in kraft paper. Same crayon roughening as the flap. */
+  function crayonBouquet() {
+    const petals = (fill) => Array.from({ length: 5 }, (_, i) =>
+      `<ellipse cx="0" cy="-10" rx="6" ry="10" fill="${fill}" transform="rotate(${i * 72})"/>`).join('');
+    const bloom = (x, y, sc, petal, heart) =>
+      `<g transform="translate(${x},${y}) scale(${sc})">${petals(petal)}<circle r="4.6" fill="${heart}"/></g>`;
+    const stem = (x, y) =>
+      `<path d="M${x} ${y} Q ${Math.round((x + 120) / 2)} ${Math.round((y + 150) / 2 + 16)}, 120 156" stroke="#7E8C67" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+    const leaf = (x, y, f) =>
+      `<path d="M${x} ${y} C ${x + 16 * f} ${y - 8}, ${x + 24 * f} ${y + 2}, ${x + 18 * f} ${y + 10} C ${x + 9 * f} ${y + 13}, ${x + 2 * f} ${y + 6}, ${x} ${y} Z" fill="#7E8C67"/>`;
+    return `
+      <svg class="crayon crayon--bouquet" viewBox="0 0 240 215" aria-hidden="true">
+        <defs>
+          <filter id="crayonBq" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" seed="4" result="n"/>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="2.3"
+                               xChannelSelector="R" yChannelSelector="G"/>
+          </filter>
+        </defs>
+        <g filter="url(#crayonBq)">
+          ${stem(62, 64)}${stem(120, 42)}${stem(178, 68)}${stem(90, 100)}${stem(152, 104)}
+          ${leaf(104, 118, -1)}${leaf(136, 126, 1)}
+          <path d="M94 150 L146 150 L134 206 L106 206 Z" fill="#DCC8A4" stroke="#A98A5E" stroke-width="2.4"/>
+          ${bloom(62, 64, 1, '#BE3A30', '#E3A32B')}
+          ${bloom(120, 42, 1.12, '#D98A94', '#E3A32B')}
+          ${bloom(178, 68, 0.95, '#E3A32B', '#BE3A30')}
+          ${bloom(90, 100, 0.86, '#E3A32B', '#BE3A30')}
+          ${bloom(152, 104, 0.9, '#BE3A30', '#E3A32B')}
+          <path d="M104 154 q16 -9 32 0 q-16 9 -32 0 Z" fill="#BE3A30"/>
+          <path d="M118 158 l-12 16 m14 -16 l12 16" stroke="#BE3A30" stroke-width="3.4" fill="none" stroke-linecap="round"/>
         </g>
       </svg>`;
   }
@@ -312,10 +348,7 @@
       <p class="eyebrow">${esc(D.flap.hint)}</p>
       <div class="flap-page">
         <div class="flapbox" id="flapbox">
-          <div class="flapbox__under">
-            ${bareImg(D.flap.photo, D.flap.front)}
-            ${D.flap.message ? `<p class="flapbox__msg">${esc(D.flap.message)}</p>` : ''}
-          </div>
+          <div class="flapbox__under">${crayonBouquet()}</div>
           <div class="flapbox__flap" id="flapLift" role="button" tabindex="0" aria-label="Lift the flap">
             ${crayonFlowers()}
             <span>${esc(D.flap.front)}</span>
@@ -398,7 +431,7 @@
       <div class="outro">
         <h2 class="h">${esc(D.outro.title)}</h2>
         ${paras(D.outro.body)}
-        <p class="hand">${esc(D.outro.signoff)}</p>
+        ${D.outro.signoff ? `<p class="hand">${esc(D.outro.signoff)}</p>` : ''}
         <svg class="heart" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M12 21s-8-5.1-8-10.4A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 8 3.6C20 15.9 12 21 12 21z"/>
         </svg>
