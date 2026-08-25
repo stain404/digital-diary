@@ -50,10 +50,17 @@
     };
     let note = reset(head);
 
+    // The last paragraph's bottom margin collapses out of the measurement,
+    // so a line can "fit" and then render over the page number. Keeping a
+    // sentinel at the end holds that margin inside the measured height.
+    const sentinel = document.createElement('div');
+    sentinel.style.height = '1px';
+
     parts.forEach((para) => {
       const el = document.createElement('p');
       el.textContent = para;
       note.appendChild(el);
+      note.appendChild(sentinel);
       if (cur.length && bodyEl.scrollHeight > bodyEl.clientHeight + 1) {
         note.removeChild(el);              // it didn't fit: start the next page with it
         sheets.push({ head, paras: cur });
@@ -62,6 +69,7 @@
         const again = document.createElement('p');
         again.textContent = para;
         note.appendChild(again);
+        note.appendChild(sentinel);
       }
       cur.push(para);
     });

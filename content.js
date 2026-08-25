@@ -92,7 +92,29 @@ It was you.
     {
       date: "25 August 2024",
       title: "The day it changed",
-      body: "[The day it stopped being whatever it was and became this. How it happened. What you said.]",
+      body: `
+This day will always hold a special place in my heart, because this was the day we officially became us.
+
+By then I was already completely in love with you. I knew I wanted us to be together, and more than anything I wanted to be able to call you mine.
+
+I kept going on about having tags, and how badly I wanted us to be official. Hehe. I just wanted the label — it meant I could say: that's my girl.
+
+I put so much thought into that day. I wrote a whole speech, planned the dinner, and tried to arrange everything exactly the way I had imagined it. I wanted it to feel special, because you were special to me.
+
+We've made memories, laughed until we couldn't breathe, annoyed each other, supported each other, grown together, and had so many moments I wouldn't trade for anything.
+
+And somehow, we're still here.
+
+Still us.
+
+Still choosing each other.
+
+When I look back at that nervous boy giving his speech, trying to ask the girl he was already in love with to be his girlfriend, I want to tell him:
+
+You had no idea how good your life was about to become.
+
+I love us. I love what we've built, and the memories we haven't even made yet.
+`,
       photo: "images/04.jpg", caption: "", note: "",
     },
     {
