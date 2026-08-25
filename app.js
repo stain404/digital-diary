@@ -85,36 +85,6 @@
       <img src="${esc(src)}" data-slot alt="${esc(caption || `${D.me} and ${D.her}`)}" loading="lazy">${cap}</figure>`;
   }
 
-  /* Flowers drawn in crayon: a displacement filter roughens the strokes so
-     the edges wobble the way wax does instead of reading as clean vector. */
-  function crayonFlowers() {
-    const petals = (fill) => Array.from({ length: 5 }, (_, i) =>
-      `<ellipse cx="0" cy="-11" rx="6.5" ry="11" fill="${fill}" transform="rotate(${i * 72})"/>`).join('');
-    const bloom = (x, y, scale, petal, heart) => `
-      <g transform="translate(${x},${y}) scale(${scale})">
-        <path d="M0 10 C -3 30, 3 44, 0 58" stroke="#7E8C67" stroke-width="3.4" fill="none"/>
-        <path d="M0 34 C -13 27, -20 34, -15 41 C -8 45, -2 39, 0 35 Z" fill="#7E8C67"/>
-        <path d="M0 44 C 12 38, 19 45, 14 51 C 7 55, 2 49, 0 45 Z" fill="#8E9B77"/>
-        ${petals(petal)}
-        <circle r="5.5" fill="${heart}"/>
-      </g>`;
-    return `
-      <svg class="crayon" viewBox="0 0 220 150" aria-hidden="true">
-        <defs>
-          <filter id="crayonRough" x="-20%" y="-20%" width="140%" height="140%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" seed="7" result="n"/>
-            <feDisplacementMap in="SourceGraphic" in2="n" scale="2.4"
-                               xChannelSelector="R" yChannelSelector="G"/>
-          </filter>
-        </defs>
-        <g filter="url(#crayonRough)">
-          ${bloom(46, 44, 1, '#BE3A30', '#E3A32B')}
-          ${bloom(112, 30, 0.78, '#D98A94', '#E3A32B')}
-          ${bloom(170, 50, 0.92, '#E3A32B', '#BE3A30')}
-        </g>
-      </svg>`;
-  }
-
   /* The bouquet the flap opens onto: blooms gathered on stems that meet at
      a ribbon, wrapped in kraft paper. Same crayon roughening as the flap. */
   function crayonBouquet() {
@@ -150,7 +120,7 @@
       </svg>`;
   }
 
-  const IS_VIDEO = /.(mp4|mov|webm|m4v)$/i;
+  const IS_VIDEO = /\.(mp4|mov|webm|m4v)$/i;
 
   /* A swipeable run of photos and clips in one polaroid frame. Videos play
      on a tap rather than carrying native controls, so the whole frame stays
@@ -307,31 +277,33 @@
     });
 
     /* the letter */
-    // If the envelope lands on a right-hand page its letter falls on the next
-    // spread, so the envelope has to say where the letter went.
-    const letterFaces = pages.length % 2 === 1;
-    add('The letter', `
-      <p class="eyebrow">Sealed</p>
-      <div class="env-page">
-        <div class="envelope" id="envelope" data-faces="${letterFaces}">
-          <div class="env__body" id="envBody" role="button" tabindex="0" aria-label="Open the letter">
-            <div class="env__pocket"></div>
-            <div class="env__flap"></div>
-            <div class="env__seal" aria-hidden="true">${esc(D.me[0])}</div>
-          </div>
-          <p class="env__hint hand" id="envHint">${esc(D.letter.envelopeNote)}</p>
-        </div>
-      </div>`);
     // The letter is measured with the signature included, so the closing
     // never gets pushed onto a page of its own.
     const sigLine = `${D.letter.signoff} ${D.letter.signature}`;
     const letterText = [D.letter.salutation, ...D.letter.paragraphs, sigLine].join('\n\n');
     const letterSheets = paginate(letterText, '', '', 'letter-flow');
+    // The envelope shares the first letter page: breaking the seal fades the
+    // envelope away and the letter takes its place, so it costs no extra page.
+    const envelope = `
+      <div class="env-stage" id="envStage">
+        <p class="eyebrow">Sealed</p>
+        <div class="env-page">
+          <div class="envelope" id="envelope">
+            <div class="env__body" id="envBody" role="button" tabindex="0" aria-label="Open the letter">
+              <div class="env__pocket"></div>
+              <div class="env__flap"></div>
+              <div class="env__seal" aria-hidden="true">${esc(D.me[0])}</div>
+            </div>
+            <p class="env__hint hand" id="envHint">${esc(D.letter.envelopeNote)}</p>
+          </div>
+        </div>
+      </div>`;
+
     letterSheets.forEach((sheet, i) => {
       const first = i === 0, last = i === letterSheets.length - 1;
       const body = last ? sheet.paras.slice(0, -1) : sheet.paras;
       add('The letter', `
-        <div class="letter__wait">${first ? 'Break the seal' : 'Still sealed'}</div>
+        ${first ? envelope : '<div class="letter__wait">Still sealed</div>'}
         <div class="letter" hidden>
           <div class="letter-flow">${body.map((x) => `<p>${esc(x)}</p>`).join('')}</div>
           ${last ? `<p class="sig">${esc(D.letter.signoff)}<br>${esc(D.letter.signature)}</p>` : ''}
@@ -376,7 +348,6 @@
         <div class="flapbox" id="flapbox">
           <div class="flapbox__under">${crayonBouquet()}</div>
           <div class="flapbox__flap" id="flapLift" role="button" tabindex="0" aria-label="Lift the flap">
-            ${crayonFlowers()}
             <span>${esc(D.flap.front)}</span>
           </div>
         </div>
@@ -447,8 +418,11 @@
       <p class="eyebrow" style="margin:0">${esc(D.promisesHint)}</p>`);
     add('The record', `
       <p class="eyebrow">${esc(D.recordTitle)}</p>
-      <div class="record"><dl>${D.firsts.map((f) =>
-        `<dt>${esc(f.label)}</dt><dd>${esc(f.value)}</dd>`).join('')}</dl></div>`);
+      <div class="record">${D.firsts.map((f) => `
+        <div class="record__row">
+          <span class="record__k">${esc(f.label)}</span>
+          <span class="record__v">${esc(f.value)}</span>
+        </div>`).join('')}</div>`);
     /* The ending wants to be a right-hand page, and the back board has to be
        the very last face in the book. If parity is off, the one blank goes
        before the ending as an endpaper — never trailing after it. */
@@ -756,19 +730,26 @@
   function initEnvelope() {
     const env = $('#envelope'), body = $('#envBody');
     if (!body) return;
+    const stage = $('#envStage');
+    const clear = () => {
+      if (stage) { stage.classList.add('gone'); setTimeout(() => { stage.hidden = true; }, 420); }
+    };
     const open = () => {
       sealBroken = true;
       env.classList.add('open');
-      $('#envHint').textContent = env.dataset.faces === 'true'
-        ? 'read it whenever you want'
-        : 'turn the page';
-      showLetter();
+      if (reduced) { clear(); showLetter(true); return; }
+      setTimeout(clear, 620);          // let the flap finish swinging first
+      setTimeout(() => showLetter(), 900);
     };
     body.addEventListener('click', open);
     body.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
     });
-    if (sealBroken) { env.classList.add('open'); showLetter(true); }
+    if (sealBroken) {
+      env.classList.add('open');
+      if (stage) { stage.classList.add('gone'); stage.hidden = true; }
+      showLetter(true);
+    }
   }
 
   function showLetter(instant) {

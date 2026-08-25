@@ -475,16 +475,28 @@ button{ font:inherit; color:inherit; cursor:pointer; }
 
 /* ---------- record card -------------------------------- */
 .record{
-  flex:1; align-self:center; width:100%;
-  background-image:
-    repeating-linear-gradient(180deg, transparent 0 6.2cqh, rgba(126,140,103,.3) 6.2cqh calc(6.2cqh + 1px)),
-    linear-gradient(#FDFBF3,#F2EADA);
+  align-self:center; width:100%;
+  background:linear-gradient(#FDFBF3,#F2EADA);
   border-top:2px solid var(--red);
-  padding:4cqh 4cqw; box-shadow:0 10px 22px -14px rgba(0,0,0,.6);
+  padding:1cqh 4cqw 2cqh;
+  box-shadow:0 10px 22px -14px rgba(0,0,0,.6);
 }
-.record dl{ margin:0; display:grid; grid-template-columns:auto 1fr; gap:0 3cqw; }
-.record dt{ font-family:var(--f-type); font-size:.6em; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft); line-height:6.2cqh; }
-.record dd{ margin:0; font-family:var(--f-hand); font-size:1.3em; line-height:6.2cqh; color:var(--hand); }
+/* one ruled row per entry, so the rules can never drift out of step with
+   the text and there is no empty ruling left over under the last one */
+.record__row{
+  display:flex; align-items:baseline; gap:3cqw;
+  padding:2cqh 0;
+  border-bottom:1px solid rgba(126,140,103,.35);
+}
+.record__row:last-child{ border-bottom:none; }
+.record__k{
+  flex:0 0 30%; font-family:var(--f-type); font-size:.56em;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft);
+}
+.record__v{
+  flex:1; font-family:var(--f-hand); font-size:1.24em;
+  line-height:1.3; color:var(--hand);
+}
 
 /* ---------- last page ---------------------------------- */
 .outro{ flex:1; display:grid; place-content:center; text-align:center; }
@@ -653,11 +665,10 @@ button{ font:inherit; color:inherit; cursor:pointer; }
 .pullcard__photo .ph{ border:none; font-size:1.7cqh; }
 
 /* crayon flowers on the flap */
-.crayon{ position:absolute; top:8%; left:50%; transform:translateX(-50%); width:74%; }
-.flapbox__flap span{ position:relative; margin-top:22%; }
+.crayon{ width:70%; height:auto; }
 
 /* the bouquet behind the flap */
-.crayon--bouquet{ position:static; transform:none; width:70%; height:auto; }
+.crayon--bouquet{ width:70%; height:auto; }
 
 /* ===========================================================
    A swipeable run of photos and clips in one polaroid frame
@@ -700,3 +711,11 @@ button{ font:inherit; color:inherit; cursor:pointer; }
 .reel__dot.on{ background:var(--red); border-color:var(--red); }
 .reel{ cursor:grab; }
 .reel:active{ cursor:grabbing; }
+
+/* breaking the seal hands the page over from the envelope to the letter */
+.env-stage{
+  flex:1; display:flex; flex-direction:column;
+  transition:opacity .4s ease, transform .4s ease;
+}
+.env-stage.gone{ opacity:0; transform:scale(.94); pointer-events:none; }
+.env-stage[hidden]{ display:none; }
