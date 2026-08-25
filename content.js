@@ -38,7 +38,7 @@ window.DIARY = {
     {
       date: "3 November 2023",
       title: "The first time I saw you",
-      photo: "images/01.jpg", caption: "the first one", note: "",
+      media: ["images/1.mp4"], caption: "the first one", note: "",
       body: `
 The first time I saw you, I was captivated. You looked like an angel sent down to earth just to make it a little more beautiful. What really caught me was the happiness in you — it radiated out of you without you even trying.
 
@@ -48,7 +48,7 @@ I had never been the kind of person to get delusional over someone. Then I met y
     {
       date: "Love and Latte",
       title: "The first time we met",
-      photo: "images/02.jpg", caption: "", note: "",
+      media: ["images/2.mp4"], caption: "", note: "",
       body: `
 The first time we properly met was at Love and Latte. I was nervous. I was hoping we would click.
 
@@ -64,7 +64,7 @@ Looking back, that was the beginning of something I didn't know I was looking fo
     {
       date: "16 November 2023",
       title: "Our first date",
-      photo: "images/03.jpg", caption: "", note: "",
+      media: ["images/3.jpeg", "images/3a.jpeg", "images/3b.mp4", "images/3c.mp4"], caption: "", note: "",
       body: `
 On the 16th of November we went out on our first date, and I wanted it to be perfect. I found you the prettiest orchids I could and made that little "get to know each other" game.
 
@@ -115,7 +115,7 @@ You had no idea how good your life was about to become.
 
 I love what we've built, and the memories we haven't even made yet.
 `,
-      photo: "images/04.jpg", caption: "", note: "",
+      media: ["images/4.jpeg", "images/4a.mp4"], caption: "", note: "",
     },
     {
       date: "25 August 2026",
@@ -165,7 +165,7 @@ Happy anniversary, my love.
 
 I love you. And more than anything, I love us.
 `,
-      photo: "images/20.jpg", caption: "", note: "",
+      media: ["images/5.mp4", "images/5a.jpeg", "images/5b.jpeg", "images/5c.jpeg", "images/5d.mp4"], caption: "", note: "",
     },
   ],
 

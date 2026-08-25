@@ -150,6 +150,32 @@
       </svg>`;
   }
 
+  const IS_VIDEO = /.(mp4|mov|webm|m4v)$/i;
+
+  /* A swipeable run of photos and clips in one polaroid frame. Videos play
+     on a tap rather than carrying native controls, so the whole frame stays
+     draggable. */
+  function mediaReel(items, caption) {
+    const list = (items || []).filter(Boolean);
+    if (!list.length) {
+      return `<figure class="polaroid"><div class="ph">Photo here<br>images/</div></figure>`;
+    }
+    const alt = esc(caption || `${D.me} and ${D.her}`);
+    const slides = list.map((src) => `<div class="reel__item">${IS_VIDEO.test(src)
+      ? `<video src="${esc(src)}" playsinline preload="metadata"></video>
+         <span class="reel__play" aria-hidden="true"></span>`
+      : `<img src="${esc(src)}" data-slot alt="${alt}" loading="lazy">`}</div>`).join('');
+    const dots = list.length > 1
+      ? `<div class="reel__dots">${list.map((_, i) =>
+          `<button type="button" class="reel__dot${i ? '' : ' on'}" data-go="${i}"
+                   aria-label="Show ${i + 1} of ${list.length}"></button>`).join('')}</div>`
+      : '';
+    return `<figure class="polaroid reel" data-n="${list.length}">
+      <div class="reel__win"><div class="reel__track">${slides}</div></div>
+      ${caption ? `<figcaption>${esc(caption)}</figcaption>` : ''}${dots}
+    </figure>`;
+  }
+
   /* a plain image, for the frames that aren't polaroids */
   const bareImg = (src, alt) => src
     ? `<img src="${esc(src)}" data-slot alt="${esc(alt || `${D.me} and ${D.her}`)}" loading="lazy">`
@@ -243,7 +269,7 @@
     D.chapters.forEach((c, i) => {
       startLeft();
       const tape = ['taped--red', 'taped--sage', '', 'taped--red'][i % 4];
-      add(c.title, `<div class="photo-page"><div class="taped ${tape}">${polaroid(c.photo, c.caption)}</div></div>`);
+      add(c.title, `<div class="photo-page"><div class="taped ${tape}">${mediaReel(c.media, c.caption)}</div></div>`);
 
       const head = `<p class="eyebrow">${esc(c.date)}</p><h2 class="h">${esc(c.title)}</h2>`;
       const cont = `<p class="eyebrow">${esc(c.title)} &middot; continued</p>`;
@@ -533,7 +559,7 @@
      Turning. Anything you can actually use is off limits —
      a drag across the scratch card must not turn the page.
      ------------------------------------------------------- */
-  const LIVE = 'button, a, canvas, input, .env__body, .polaroid[data-full], .pullcard, .film, .flapbox, .promise, .no-turn';
+  const LIVE = 'button, a, canvas, input, .env__body, .polaroid[data-full], .pullcard, .film, .flapbox, .reel, .promise, .no-turn';
   const isLive = (t) => !!(t && t.closest && t.closest(LIVE));
 
   const dirFromX = (clientX) => {
@@ -607,6 +633,59 @@
     initFilm();
     initFoldout();
     initPromises();
+    initReels();
+  }
+
+  /* swipe, or tap the dots; a tap on a clip plays or pauses it */
+  function initReels() {
+    $$('.reel', host).forEach((reel) => {
+      const track = $('.reel__track', reel);
+      const n = Number(reel.dataset.n) || 1;
+      let at = 0, drag = null;
+
+      const show = (k) => {
+        at = Math.max(0, Math.min(n - 1, k));
+        track.style.transition = '';
+        track.style.transform = `translateX(${-at * 100}%)`;
+        $$('video', reel).forEach((v) => v.pause());
+        $$('.reel__dot', reel).forEach((d, j) => d.classList.toggle('on', j === at));
+      };
+
+      reel.addEventListener('pointerdown', (e) => {
+        if (e.target.closest('.reel__dot')) return;
+        drag = { x: e.clientX, y: e.clientY, w: reel.getBoundingClientRect().width };
+        track.style.transition = 'none';
+        reel.setPointerCapture(e.pointerId);
+      });
+      reel.addEventListener('pointermove', (e) => {
+        if (!drag) return;
+        track.style.transform = `translateX(calc(${-at * 100}% + ${e.clientX - drag.x}px))`;
+      });
+      const release = (e) => {
+        if (!drag) return;
+        const dx = e.clientX - drag.x, dy = e.clientY - drag.y, w = drag.w;
+        drag = null;
+        if (Math.abs(dx) < 6 && Math.abs(dy) < 6) {      // a tap, not a swipe
+          const slide = e.target.closest('.reel__item');
+          const video = slide && slide.querySelector('video');
+          show(at);
+          if (video) {
+            if (video.paused) { video.play().catch(() => {}); slide.classList.add('playing'); }
+            else { video.pause(); slide.classList.remove('playing'); }
+          }
+          return;
+        }
+        show(Math.abs(dx) > w * 0.18 ? at + (dx < 0 ? 1 : -1) : at);
+      };
+      reel.addEventListener('pointerup', release);
+      reel.addEventListener('pointercancel', release);
+      $$('.reel__dot', reel).forEach((d) =>
+        d.addEventListener('click', () => show(Number(d.dataset.go))));
+      $$('video', reel).forEach((v) => {
+        v.addEventListener('pause', () => v.closest('.reel__item').classList.remove('playing'));
+        v.addEventListener('ended', () => v.closest('.reel__item').classList.remove('playing'));
+      });
+    });
   }
 
   /* the flap you lift off a photo */

@@ -658,3 +658,45 @@ button{ font:inherit; color:inherit; cursor:pointer; }
 
 /* the bouquet behind the flap */
 .crayon--bouquet{ position:static; transform:none; width:70%; height:auto; }
+
+/* ===========================================================
+   A swipeable run of photos and clips in one polaroid frame
+   =========================================================== */
+.reel__win{ width:100%; height:100%; overflow:hidden; position:relative; }
+.reel__track{
+  display:flex; height:100%; will-change:transform;
+  transition:transform .45s cubic-bezier(.35,0,.2,1);
+}
+.reel__item{
+  flex:0 0 100%; height:100%; position:relative;
+  display:grid; place-items:center; background:#241C15;
+}
+.reel__item img{ width:100%; height:100%; object-fit:cover; display:block; }
+/* clips vary between portrait and landscape, so never crop them */
+.reel__item video{ width:100%; height:100%; object-fit:contain; display:block; }
+/* the tap target for a clip */
+.reel__play{
+  position:absolute; left:50%; top:50%; width:16cqh; aspect-ratio:1;
+  transform:translate(-50%,-50%); border-radius:50%; pointer-events:none;
+  background:rgba(20,15,11,.55); box-shadow:0 2px 10px rgba(0,0,0,.5);
+  transition:opacity .25s;
+}
+.reel__play::after{
+  content:""; position:absolute; left:56%; top:50%; transform:translate(-50%,-50%);
+  border-left:5cqh solid rgba(247,241,227,.92);
+  border-top:3.2cqh solid transparent; border-bottom:3.2cqh solid transparent;
+}
+.reel__item.playing .reel__play{ opacity:0; }
+
+.reel__dots{
+  position:absolute; left:0; right:0; bottom:1.5cqh; z-index:4;
+  display:flex; justify-content:center; gap:1.4cqh;
+}
+.reel__dot{
+  width:1.5cqh; height:1.5cqh; padding:0; border-radius:50%;
+  border:1px solid rgba(128,108,85,.7); background:transparent; cursor:pointer;
+  transition:background .2s, border-color .2s;
+}
+.reel__dot.on{ background:var(--red); border-color:var(--red); }
+.reel{ cursor:grab; }
+.reel:active{ cursor:grabbing; }
