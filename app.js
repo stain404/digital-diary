@@ -1,5 +1,5 @@
 /* ===========================================================
-   Two Years — the scrapbook: pages, turning, and the DIYs.
+   Two Years: the scrapbook, pages, turning, and the DIYs.
    All words come from content.js.
    =========================================================== */
 (() => {
@@ -29,7 +29,7 @@
 
   /* Split long writing into pages by actually laying it out in a hidden
      page of the real size, rather than guessing from character counts.
-     Returns [{ head, paras }] — one entry per page. */
+     Returns [{ head, paras }], one entry per page. */
   const MEASURE_LEAF = '<div class="leaf measure" aria-hidden="true"><div class="face">' +
     '<div class="page page--recto"><div class="page__body"></div></div></div></div>';
 
@@ -242,7 +242,7 @@
       </div>
       <p class="eyebrow" style="margin:0">${esc(D.dates.footnote)}</p>`);
 
-    /* the story — a photo, then as many pages as the writing needs */
+    /* the story: a photo, then as many pages as the writing needs */
     D.chapters.forEach((c, i) => {
       startLeft();
       // Hand-laid, not machine-set: every frame gets its own angle and its
@@ -267,7 +267,7 @@
       });
     });
 
-    /* the long one — flows across as many pages as it needs */
+    /* the long one: it flows across as many pages as it needs */
     (() => {
       const body = String((D.essay && D.essay.body) || '').trim();
       if (!body) return;
@@ -441,7 +441,7 @@
         </div>`).join('')}</div>`);
     /* The ending wants to be a right-hand page, and the back board has to be
        the very last face in the book. If parity is off, the one blank goes
-       before the ending as an endpaper — never trailing after it. */
+       before the ending as an endpaper, never trailing after it. */
     if (pages.length % 2 === 1) endpaper();
     add('The end', `
       <div class="outro">
@@ -547,7 +547,7 @@
   }
 
   /* -------------------------------------------------------
-     Turning. Anything you can actually use is off limits —
+     Turning. Anything you can actually use is off limits:
      a drag across the scratch card must not turn the page.
      ------------------------------------------------------- */
   const LIVE = 'button, a, canvas, input, .env__body, .polaroid[data-full], .pullcard, .film, .flapbox, .reel, .promise, .no-turn';
@@ -575,7 +575,7 @@
     if (e.key === 'Escape') closeLightbox();
   });
 
-  /* swipe — ignored when the gesture starts on something usable */
+  /* swipe, ignored when the gesture starts on something usable */
   let swipe = null;
   book.addEventListener('pointerdown', (e) => {
     swipe = isLive(e.target) ? null : { x: e.clientX, y: e.clientY };
@@ -612,7 +612,7 @@
     initReels();
   }
 
-  /* Swipe or use the dots. A tap on a clip plays or pauses it — the slide is
+  /* Swipe or use the dots. A tap on a clip plays or pauses it; the slide is
      read at pointerdown, because setPointerCapture retargets later pointer
      events to the reel and the tapped video would never be found. */
   function initReels() {
@@ -724,7 +724,7 @@
     btn.addEventListener('click', () => { foldOpen = !foldOpen; paint(); });
   }
 
-  /* promises you tick off — remembered on this device */
+  /* promises you tick off, remembered on this device */
   function initPromises() {
     const list = $('#promises');
     if (!list) return;
@@ -917,7 +917,7 @@
           b.style.setProperty('--s', s.toFixed(2));
         }
         if (b.scrollHeight > b.clientHeight + 2) {
-          console.warn('[diary] This page is too long even at the smallest size — trim it in content.js:',
+          console.warn('[diary] This page is too long even at the smallest size; trim it in content.js:',
             b.textContent.trim().slice(0, 60) + '…');
         }
       });
@@ -941,7 +941,7 @@
   addEventListener('resize', () => { clearTimeout(t); t = setTimeout(fitText, 250); });
 
   /* Show the book straight away, then paginate again once the real fonts
-     have landed — measuring against fallback metrics breaks pages early. */
+     have landed; measuring against fallback metrics breaks pages early. */
   mount();
 
   const fonts = document.fonts;
