@@ -12,7 +12,7 @@
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const TURN_MS = reduced ? 20 : 1050;
 
-  document.title = `${D.cover.kicker} — ${D.me} & ${D.her}`;
+  document.title = `${D.cover.kicker} · ${D.me} & ${D.her}`;
 
   const HEART = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21s-8-5.1-8-10.4A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 8 3.6C20 15.9 12 21 12 21z'/%3E%3C/svg%3E\")";
   document.documentElement.style.setProperty('--heart', HEART);
@@ -373,7 +373,8 @@
       <div class="film-page">
         <div class="film" id="film">
           <div class="film__reel" id="filmReel">
-            ${(D.film || []).map((f) => `<div class="film__frame">${bareImg(f.src, f.caption)}</div>`).join('')}
+            ${[0, 1].map(() => (D.film || []).map((f) =>
+              `<div class="film__frame">${bareImg(f.src, f.caption)}</div>`).join('')).join('')}
           </div>
         </div>
       </div>`);
@@ -539,9 +540,10 @@
     busy = true;
     turned = target;
     apply();
+    el.classList.add('turning');      // shades the leaf while it swings
     el.style.zIndex = 1500;          // ride above both stacks while crossing
     el.style.pointerEvents = 'none';
-    setTimeout(() => { busy = false; apply(); }, TURN_MS);
+    setTimeout(() => { busy = false; el.classList.remove('turning'); apply(); }, TURN_MS);
   }
 
   /* -------------------------------------------------------
@@ -589,7 +591,7 @@
      The DIYs. State lives out here so it survives a re-mount.
      ------------------------------------------------------- */
   let sealBroken = false, scratched = false, cardOut = false, jarPool = [];
-  let flapOpen = false, foldOpen = false, filmX = 0;
+  let flapOpen = false, foldOpen = false;
   const ticked = new Set(load('diary.promises'));
 
   function load(key) {
@@ -605,7 +607,6 @@
     initScratch();
     initJar();
     initFlap();
-    initFilm();
     initFoldout();
     initPromises();
     initReels();
@@ -709,31 +710,6 @@
     flap.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
     });
-  }
-
-  /* the strip of negatives you drag along */
-  function initFilm() {
-    const film = $('#film'), reel = $('#filmReel');
-    if (!film) return;
-    const limit = () => Math.max(0, reel.scrollWidth - film.clientWidth);
-    const clamp = (v) => Math.max(-limit(), Math.min(0, v));
-    const put = () => { reel.style.transform = `translateX(${filmX}px)`; };
-    filmX = clamp(filmX); put();
-
-    let drag = null;
-    film.addEventListener('pointerdown', (e) => {
-      drag = { x: e.clientX, from: filmX };
-      film.setPointerCapture(e.pointerId);
-      reel.style.transition = 'none';
-    });
-    film.addEventListener('pointermove', (e) => {
-      if (!drag) return;
-      filmX = clamp(drag.from + (e.clientX - drag.x));
-      put();
-    });
-    const stop = () => { drag = null; reel.style.transition = ''; };
-    film.addEventListener('pointerup', stop);
-    film.addEventListener('pointercancel', stop);
   }
 
   /* the concertina that opens one panel at a time */

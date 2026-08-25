@@ -587,9 +587,7 @@ button{ font:inherit; color:inherit; cursor:pointer; }
   position:relative; width:100%; overflow:hidden;
   background:#191410; padding:3.4cqh 0;
   box-shadow:0 10px 22px -12px rgba(0,0,0,.8);
-  cursor:grab; touch-action:pan-y;
 }
-.film:active{ cursor:grabbing; }
 /* sprocket holes */
 .film::before, .film::after{
   content:""; position:absolute; left:0; right:0; height:2.4cqh; z-index:2;
@@ -597,9 +595,18 @@ button{ font:inherit; color:inherit; cursor:pointer; }
   opacity:.85;
 }
 .film::before{ top:.5cqh; } .film::after{ bottom:.5cqh; }
-.film__reel{ display:flex; gap:1.4cqh; will-change:transform; }
+/* Two identical passes of the strip, shifted by exactly one pass, so the
+   loop has no seam. Spacing is margin rather than gap, or the halves would
+   not measure the same and the join would jump. */
+.film__reel{
+  display:flex; width:max-content; will-change:transform;
+  animation:filmroll 34s linear infinite;
+}
+@keyframes filmroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+.film:hover .film__reel{ animation-play-state:paused; }
+@media (prefers-reduced-motion:reduce){ .film__reel{ animation:none; } }
 .film__frame{
-  flex:0 0 42%; aspect-ratio:1/1; background:#2A211A;
+  flex:0 0 auto; width:30cqh; aspect-ratio:1/1; margin-right:1.4cqh; background:#2A211A;
   outline:1px solid rgba(232,220,196,.25); outline-offset:-1px;
 }
 .film__frame img, .film__frame .ph{ width:100%; height:100%; object-fit:cover; }
@@ -727,3 +734,46 @@ button{ font:inherit; color:inherit; cursor:pointer; }
 .env-stage[hidden]{ display:none; }
 
 .reel__item--clone{ pointer-events:none; }
+
+/* ===========================================================
+   Finishing: paper that behaves like paper
+   =========================================================== */
+
+/* A fine tooth over every face, so paper, kraft board and photographs
+   all sit under the same grain instead of looking separately rendered. */
+.face::after{
+  content:""; position:absolute; inset:0; z-index:5; pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size:160px 160px;
+  opacity:.05; mix-blend-mode:multiply;
+}
+
+/* Outer corners round the way a handled book's do, and the outer edge
+   carries the shading of a page lifted away from the block. */
+.face{ border-radius:0 4px 4px 0; }
+.page--recto{ box-shadow:inset -20px 0 30px -24px rgba(92,62,32,.7); }
+.page--verso{ box-shadow:inset  20px 0 30px -24px rgba(92,62,32,.7); }
+
+/* A page catches the lamp as it swings, and darkens toward the spine. */
+.leaf .face::before{
+  content:""; position:absolute; inset:0; z-index:6; pointer-events:none;
+  background:linear-gradient(90deg, rgba(30,18,8,.42), rgba(30,18,8,.06) 45%, transparent 72%);
+  opacity:0; transition:opacity .35s ease;
+}
+.leaf.turning .face::before{ opacity:1; }
+
+/* the marker sits in the board rather than on top of it */
+.cover-lettering{
+  text-shadow:0 1px 0 rgba(255,244,224,.16), 0 -1px 1px rgba(40,22,8,.3);
+}
+.cover-names{ text-shadow:0 1px 0 rgba(255,244,224,.12); }
+
+/* the book arrives rather than appearing */
+#stage{ animation:settle 1s cubic-bezier(.2,.7,.3,1) both; }
+@keyframes settle{
+  from{ opacity:0; transform:translateY(14px) scale(.985); }
+  to{ opacity:1; transform:none; }
+}
+@media (prefers-reduced-motion:reduce){
+  #stage{ animation:none; }
+}

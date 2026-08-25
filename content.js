@@ -1,5 +1,5 @@
 /* ============================================================
-   THE SCRAPBOOK — every word lives in this file.
+   THE SCRAPBOOK: every word lives in this file.
    Edit, save, refresh. Nothing else needs touching.
    Photos: drop files in public/images/, then use the filename.
    ============================================================ */
@@ -40,7 +40,7 @@ window.DIARY = {
       title: "The first time I saw you",
       media: ["images/1.mp4"], caption: "the first one", note: "",
       body: `
-The first time I saw you, I was captivated. You looked like an angel sent down to earth just to make it a little more beautiful. What really caught me was the happiness in you — it radiated out of you without you even trying.
+The first time I saw you, I was captivated. You looked like an angel sent down to earth just to make it a little more beautiful. What really caught me was the happiness in you. It radiated out of you without you even trying.
 
 I had never been the kind of person to get delusional over someone. Then I met you, and you were everything I hadn't known I was wishing for.
 `,
@@ -68,7 +68,7 @@ Looking back, that was the beginning of something I didn't know I was looking fo
       body: `
 On the 16th of November we went out on our first date, and I wanted it to be perfect. I found you the prettiest orchids I could and made that little "get to know each other" game.
 
-And then I saw you. My heart started pounding — the butterflies, the nerves, and one thought going round my head: wow, I'm actually here with her.
+And then I saw you. My heart started pounding. The butterflies, the nerves, and one thought going round my head: wow, I'm actually here with her.
 
 Then we got to HopUp, and honestly, it was a disaster.
 
@@ -97,7 +97,7 @@ This day will always hold a special place in my heart, because this was the day 
 
 By then I was already completely in love with you. I knew I wanted us to be together, and more than anything I wanted to be able to call you mine.
 
-I kept going on about having tags, and how badly I wanted us to be official. Hehe. I just wanted the label — it meant I could say: that's my girl.
+I kept going on about having tags, and how badly I wanted us to be official. Hehe. I just wanted the label, because it meant I could say: that's my girl.
 
 I put so much thought into that day. I wrote a whole speech, planned the dinner, and tried to arrange everything exactly the way I had imagined it. I wanted it to feel special, because you were special to me.
 
@@ -127,7 +127,7 @@ Since that day we've had our beautiful moments, and we've had our difficult ones
 
 But through all of it, we stayed.
 
-We chose to talk things through. We chose to understand each other. We chose to forgive, to grow, and to keep trying. That's one of the things I love most about us — we didn't only stay when it was easy.
+We chose to talk things through. We chose to understand each other. We chose to forgive, to grow, and to keep trying. That's one of the things I love most about us. We didn't only stay when it was easy.
 
 We've seen every side of each other, the good and the bad, and after all of it I still look at you and think you're the person I want beside me.
 
@@ -171,7 +171,7 @@ I love you. And more than anything, I love us.
 
   /* --- THE LONG ONE ----------------------------------------
      Write as much as you want. It flows across as many pages
-     as it needs — put a blank line between paragraphs.
+     as it needs. Put a blank line between paragraphs.
   --------------------------------------------------------- */
   essay: {
     heading: "Everything I actually want to say",
@@ -217,7 +217,7 @@ And I especially love when you're explaining something you're excited about and 
     { heading: "What she taught me",     body: `
 You've taught me so much without even realising it.
 
-You taught me what it actually means to let someone see the real you — the vulnerable parts, the parts you're scared might not be accepted.
+You taught me what it actually means to let someone see the real you, the vulnerable parts, the parts you're scared might not be accepted.
 
 You've taught me to be more patient, to communicate better, and to understand that loving someone isn't always knowing what to do. Sometimes it's simply staying, listening, and trying again.
 
@@ -243,21 +243,21 @@ And you've taught me how much happiness can come from the smallest things. A hug
 
   /* --- taped-in photos, 4 to a page ------------------- */
   gallery: [
-    { src: "images/p03.jpeg", caption: "" },
-    { src: "images/p07.jpeg", caption: "" },
-    { src: "images/p05.jpeg", caption: "" },
-    { src: "images/p08.jpeg", caption: "" },
     { src: "images/p14.jpeg", caption: "" },
-    { src: "images/p06.jpeg", caption: "" },
-    { src: "images/p01.jpeg", caption: "" },
+    { src: "images/p03.jpeg", caption: "" },
+    { src: "images/p02.jpeg", caption: "" },
     { src: "images/p11.jpeg", caption: "" },
+    { src: "images/p04.jpeg", caption: "" },
+    { src: "images/p08.jpeg", caption: "" },
+    { src: "images/p01.jpeg", caption: "" },
+    { src: "images/p13.jpeg", caption: "" },
   ],
 
   /* --- DIY: the pull-out card ------------------------- */
   pullCard: {
     hint: "Pull the card out",
     front: "Pull me",
-    photo: "images/p04.jpeg",
+    photo: "images/p06.jpeg",
     message: "and suddenly it was all about you",
   },
 
@@ -276,12 +276,12 @@ And you've taught me how much happiness can come from the smallest things. A hug
 
   /* --- DIY: the film strip ---------------------------- */
   filmTitle: "The negatives",
-  filmHint: "Drag the strip.",
+  filmHint: "Still rolling.",
   film: [
-    { src: "images/p09.jpeg", caption: "" },
     { src: "images/p10.jpeg", caption: "" },
-    { src: "images/p02.jpeg", caption: "" },
-    { src: "images/p13.jpeg", caption: "" },
+    { src: "images/p07.jpeg", caption: "" },
+    { src: "images/p05.jpeg", caption: "" },
+    { src: "images/p09.jpeg", caption: "" },
     { src: "images/p12.jpeg", caption: "" },
   ],
 
@@ -291,10 +291,10 @@ And you've taught me how much happiness can come from the smallest things. A hug
     hint: "Unfold it",
     button: "Unfold",
     panels: [
-      "You'll still put your tongue out when you're concentrating.",
-      "I'll still ask what you're thinking.",
-      "We'll still argue about something stupid.",
-      "And I'll still be choosing you.",
+      "You'll still get annoyed because I'm staring at you.",
+      "I'll still ask \"what's wrong?\" until you finally tell me.",
+      "We'll still argue over the dumbest things.",
+      "And I'll still want you beside me through all of it.",
     ],
   },
 
@@ -335,7 +335,7 @@ And you've taught me how much happiness can come from the smallest things. A hug
     { label: "First met",  value: "3 November 2023" },
     { label: "First date", value: "16 November 2023" },
     { label: "Together",   value: "25 August 2024" },
-    { label: "Our song",   value: "Brooklyn Baby — Lana Del Rey" },
+    { label: "Our song",   value: "Brooklyn Baby, Lana Del Rey" },
   ],
 
   /* --- the last page ---------------------------------- */
