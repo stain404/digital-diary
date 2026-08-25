@@ -175,7 +175,19 @@ I love you. And more than anything, I love us.
   --------------------------------------------------------- */
   essay: {
     heading: "Everything I actually want to say",
-    body: "[Send me your paragraph and this is where it goes. Write it however it comes out — I'll shape it into proper sentences and keep it sounding like you.]",
+    body: `
+I want to start by saying how incredibly proud I am of you. I've watched you accomplish so many things, overcome so many things, and become the person you are today, and I genuinely think you're one of the strongest and most inspiring people I know.
+
+I hope you know that even when we fight, even when we're annoyed at each other, even when we don't talk, you're still everything I want. I still care about you more than I can explain, and no matter what happens, my feelings for you never just disappear.
+
+You're my favourite person. The one I want to tell everything to, the one I want around when something good happens, and the one I want around when everything is going wrong. I love you so, so much.
+
+And I want you to know how much I appreciate you trusting me. For slowly putting your walls down and letting me get closer. I know that isn't something you do with just anyone, and I don't take it for granted.
+
+Thank you for letting me see the parts of you that you don't show everyone. Thank you for letting me be someone you can depend on. And thank you for choosing to let me into your life and giving me the chance to love you the way I do.
+
+I hope I can always make you feel safe enough to be completely yourself around me.
+`,
   },
 
   /* --- WRITE ABOUT HER -------------------------------------
@@ -220,12 +232,12 @@ And you've taught me how much happiness can come from the smallest things. A hug
     envelopeNote: "Click to break the seal",
     salutation: "Bisma,",
     paragraphs: [
-      "I want to start by saying how incredibly proud I am of you. I've watched you accomplish so many things, overcome so many things, and become the person you are today, and I genuinely think you're one of the strongest and most inspiring people I know.",
-      "I hope you know that even when we fight, even when we're annoyed at each other, even when we don't talk, you're still everything I want. I still care about you more than I can explain, and no matter what happens, my feelings for you never just disappear.",
-      "You're my favourite person. The one I want to tell everything to, the one I want around when something good happens, and the one I want around when everything is going wrong. I love you so, so much.",
-      "And I want you to know how much I appreciate you trusting me. For slowly putting your walls down and letting me get closer. I know that isn't something you do with just anyone, and I don't take it for granted.",
-      "Thank you for letting me see the parts of you that you don't show everyone. Thank you for letting me be someone you can depend on. And thank you for choosing to let me into your life and giving me the chance to love you the way I do.",
-      "I hope I can always make you feel safe enough to be completely yourself around me.",
+      "Just in case you forgot.",
+      "You're my favourite person — not the version everyone else gets. The one who talks like a baby when she's comfortable, who plays with her tongue out, whose back somehow became my job.",
+      "I know your little laughs from the ones where you completely lose it.",
+      "You put your walls down slowly. I have never taken that for granted.",
+      "You're everything I want. Even on the days we're annoyed. Even on the days we don't talk.",
+      "That's my girl.",
     ],
     signoff: "Yours,",
     signature: "Zaeem",
