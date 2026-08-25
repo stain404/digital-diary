@@ -202,7 +202,6 @@ I love how you always ask me to massage your back, like it's automatically my jo
 
 And I especially love when you're explaining something you're excited about and your eyes light up.
 ` },
-    { heading: "The first thing I noticed", body: "[Before you knew her at all.]" },
     { heading: "What she taught me",     body: `
 You've taught me so much without even realising it.
 
@@ -214,14 +213,6 @@ You've taught me that love isn't just the exciting dates and the butterflies. It
 
 And you've taught me how much happiness can come from the smallest things. A hug, a stupid joke, sitting together, hearing you laugh, or just knowing you're there.
 ` },
-    { heading: "Her voice",              body: "[On the phone, first thing in the morning, when she's annoyed, when she's telling a story.]" },
-    { heading: "The hard parts",         body: "[Every real thing has them. Write about one honestly. It'll mean more than the easy pages.]" },
-    { heading: "When I knew",            body: "[The exact moment. Not when you said it — when you knew it.]" },
-    { heading: "What I'm proud of her for", body: "[Something she did that she probably doesn't think was a big deal.]" },
-    { heading: "The way she treats people", body: "[How she is with waiters, strangers, her family, people who can do nothing for her.]" },
-    { heading: "Things she says",        body: "[Her phrases. The words she uses wrong on purpose. What she calls you.]" },
-    { heading: "What I'd miss",          body: "[If it all stopped tomorrow, the first ten things.]" },
-    { heading: "Year three",             body: "[What you want. Where you're going. What you're promising.]" },
   ],
 
   /* --- the sealed letter ------------------------------ */
