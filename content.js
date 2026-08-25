@@ -243,21 +243,21 @@ And you've taught me how much happiness can come from the smallest things. A hug
 
   /* --- taped-in photos, 4 to a page ------------------- */
   gallery: [
-    { src: "images/p14.jpeg", caption: "" },
-    { src: "images/p03.jpeg", caption: "" },
-    { src: "images/p02.jpeg", caption: "" },
-    { src: "images/p11.jpeg", caption: "" },
-    { src: "images/p04.jpeg", caption: "" },
-    { src: "images/p08.jpeg", caption: "" },
+    { src: "images/p09.jpeg", caption: "" },
+    { src: "images/p12.jpeg", caption: "" },
+    { src: "images/p06.jpeg", caption: "" },
     { src: "images/p01.jpeg", caption: "" },
+    { src: "images/p10.jpeg", caption: "" },
+    { src: "images/p04.jpeg", caption: "" },
     { src: "images/p13.jpeg", caption: "" },
+    { src: "images/p07.jpeg", caption: "" },
   ],
 
   /* --- DIY: the pull-out card ------------------------- */
   pullCard: {
     hint: "Pull the card out",
     front: "Pull me",
-    photo: "images/p06.jpeg",
+    photo: "images/p11.jpeg",
     message: "and suddenly it was all about you",
   },
 
@@ -278,11 +278,11 @@ And you've taught me how much happiness can come from the smallest things. A hug
   filmTitle: "The negatives",
   filmHint: "Still rolling.",
   film: [
-    { src: "images/p10.jpeg", caption: "" },
-    { src: "images/p07.jpeg", caption: "" },
+    { src: "images/p03.jpeg", caption: "" },
+    { src: "images/p14.jpeg", caption: "" },
+    { src: "images/p02.jpeg", caption: "" },
+    { src: "images/p08.jpeg", caption: "" },
     { src: "images/p05.jpeg", caption: "" },
-    { src: "images/p09.jpeg", caption: "" },
-    { src: "images/p12.jpeg", caption: "" },
   ],
 
   /* --- DIY: the fold-out ------------------------------ */

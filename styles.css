@@ -1,5 +1,5 @@
 /* ===========================================================
-   Two Years: a kraft, spiral-bound scrapbook
+   Two Years, a kraft, spiral-bound scrapbook
    =========================================================== */
 
 :root{
@@ -252,7 +252,7 @@ button{ font:inherit; color:inherit; cursor:pointer; }
 .hud__folio{ min-width:11ch; text-align:center; }
 
 /* ===========================================================
-   Page furniture: everything scales off .page__body
+   Page furniture, everything scales off .page__body
    =========================================================== */
 .eyebrow{
   font-family:var(--f-type); font-size:.62em; letter-spacing:.22em;
@@ -517,7 +517,7 @@ button{ font:inherit; color:inherit; cursor:pointer; }
 .lightbox .close{ position:absolute; top:1.2rem; right:1.4rem; background:none; border:none; color:#F0E4CC; font-size:2rem; line-height:1; }
 
 /* ===========================================================
-   Phones: one page at a time
+   Phones, one page at a time
    =========================================================== */
 @media (max-width:820px){
   :root{ --pw: min(88vw, calc(74svh / 1.38)); --ph: calc(var(--pw) * 1.38); }
@@ -600,11 +600,11 @@ button{ font:inherit; color:inherit; cursor:pointer; }
    not measure the same and the join would jump. */
 .film__reel{
   display:flex; width:max-content; will-change:transform;
-  animation:filmroll 34s linear infinite;
+  touch-action:pan-y; user-select:none; -webkit-user-select:none;
 }
-@keyframes filmroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
-.film:hover .film__reel{ animation-play-state:paused; }
-@media (prefers-reduced-motion:reduce){ .film__reel{ animation:none; } }
+.film__reel img{ -webkit-user-drag:none; user-drag:none; pointer-events:none; }
+.film{ cursor:grab; }
+.film.dragging{ cursor:grabbing; }
 .film__frame{
   flex:0 0 auto; width:30cqh; aspect-ratio:1/1; margin-right:1.4cqh; background:#2A211A;
   outline:1px solid rgba(232,220,196,.25); outline-offset:-1px;

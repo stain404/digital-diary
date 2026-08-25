@@ -1,6 +1,6 @@
 # Two Years
 
-A handmade digital scrapbook: a kraft, spiral-bound book you turn page by page.
+A handmade digital scrapbook, a kraft, spiral-bound book you turn page by page.
 
 ## Running it
 
@@ -22,11 +22,11 @@ Arrow keys and swipe work too. On a phone it shows one page at a time.
 Everything you can read is in one file: **`content.js`**. Edit it, save,
 refresh the page. Nothing else needs touching.
 
-- `chapters`: the story, a photo on the left and your words on the right
-- `essay`: one long piece of writing; it flows across as many pages as it needs
-- `notes`: free writing pages, one entry per page, add as many as you like
-- `letter`: what's inside the sealed envelope
-- everything else: the DIYs below
+- `chapters` is the story, a photo on the left and your words on the right
+- `essay` is one long piece of writing, flowing across as many pages as it needs
+- `notes` are free writing pages, one entry per page, add as many as you like
+- `letter` is what's inside the sealed envelope
+- everything else is the DIYs below
 
 Pages are a fixed size, so writing that runs long shrinks itself to fit.
 

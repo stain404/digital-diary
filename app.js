@@ -1,5 +1,5 @@
 /* ===========================================================
-   Two Years: the scrapbook, pages, turning, and the DIYs.
+   Two Years. The scrapbook, its pages, the turning, and the DIYs.
    All words come from content.js.
    =========================================================== */
 (() => {
@@ -242,7 +242,7 @@
       </div>
       <p class="eyebrow" style="margin:0">${esc(D.dates.footnote)}</p>`);
 
-    /* the story: a photo, then as many pages as the writing needs */
+    /* the story, a photo and then as many pages as the writing needs */
     D.chapters.forEach((c, i) => {
       startLeft();
       // Hand-laid, not machine-set: every frame gets its own angle and its
@@ -267,7 +267,7 @@
       });
     });
 
-    /* the long one: it flows across as many pages as it needs */
+    /* the long one, flowing across as many pages as it needs */
     (() => {
       const body = String((D.essay && D.essay.body) || '').trim();
       if (!body) return;
@@ -547,8 +547,8 @@
   }
 
   /* -------------------------------------------------------
-     Turning. Anything you can actually use is off limits:
-     a drag across the scratch card must not turn the page.
+     Turning. Anything you can actually use is off limits, so
+     a drag across the scratch card never turns the page.
      ------------------------------------------------------- */
   const LIVE = 'button, a, canvas, input, .env__body, .polaroid[data-full], .pullcard, .film, .flapbox, .reel, .promise, .no-turn';
   const isLive = (t) => !!(t && t.closest && t.closest(LIVE));
@@ -610,8 +610,69 @@
     initFoldout();
     initPromises();
     initReels();
+    initFilm();
   }
 
+  /* The negatives roll by themselves and can be dragged by hand. The strip is
+     two identical passes, so the offset wraps at one pass and never seams. */
+  let filmLoop = 0;
+  function initFilm() {
+    cancelAnimationFrame(filmLoop);
+    const film = $('.film', host);
+    const reel = film && $('.film__reel', film);
+    if (!reel) return;
+
+    const slow = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const SPEED = 26;                       // px a second, left
+    let x = 0, last = 0, drag = null, vx = 0;
+
+    const pass = () => reel.scrollWidth / 2 || 1;
+    const wrap = () => { const w = pass(); x = ((x % w) + w) % w; };
+    const paint = () => { reel.style.transform = 'translateX(' + (-x) + 'px)'; };
+
+    const tick = (now) => {
+      const dt = last ? Math.min((now - last) / 1000, 0.05) : 0;
+      last = now;
+      if (drag) {
+        /* held still: the strip waits where you left it */
+      } else if (Math.abs(vx) > 1) {
+        x -= vx * dt;                       // the throw, bleeding off
+        vx *= Math.pow(0.002, dt);
+      } else if (!slow) {
+        x += SPEED * dt;
+      }
+      wrap();
+      paint();
+      filmLoop = requestAnimationFrame(tick);
+    };
+
+    film.addEventListener('pointerdown', (e) => {
+      drag = { px: e.clientX, x: x, t: performance.now(), moved: 0 };
+      vx = 0;
+      film.classList.add('dragging');
+      film.setPointerCapture(e.pointerId);
+    });
+    film.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      const dx = e.clientX - drag.px;
+      drag.moved = Math.abs(dx);
+      const now = performance.now(), dt = (now - drag.t) / 1000;
+      if (dt > 0.01) { vx = (x - (drag.x - dx)) / dt; drag.t = now; }
+      x = drag.x - dx;
+      wrap();
+      paint();
+    });
+    const drop = () => {
+      if (!drag) return;
+      if (drag.moved < 6) vx = 0;           // a tap, not a throw
+      drag = null;
+      film.classList.remove('dragging');
+    };
+    film.addEventListener('pointerup', drop);
+    film.addEventListener('pointercancel', drop);
+
+    filmLoop = requestAnimationFrame(tick);
+  }
   /* Swipe or use the dots. A tap on a clip plays or pauses it; the slide is
      read at pointerdown, because setPointerCapture retargets later pointer
      events to the reel and the tapped video would never be found. */
