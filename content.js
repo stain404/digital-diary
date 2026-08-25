@@ -113,20 +113,58 @@ When I look back at that nervous boy giving his speech, trying to ask the girl h
 
 You had no idea how good your life was about to become.
 
-I love us. I love what we've built, and the memories we haven't even made yet.
+I love what we've built, and the memories we haven't even made yet.
 `,
       photo: "images/04.jpg", caption: "", note: "",
     },
     {
-      date: "An ordinary day",
-      title: "The one I think about most",
-      body: "[Not a birthday, not a trip. A Tuesday. The drive, the food, the joke.]",
-      photo: "images/19.jpg", caption: "", note: "",
-    },
-    {
-      date: "This year",
-      title: "Where we are now",
-      body: "[What she is to you now that wasn't true two years ago.]",
+      date: "25 August 2026",
+      title: "Two years later",
+      body: `
+Two years ago we started dating without knowing everything that would come with it. We had no idea how much we would grow, how many memories we would make, or how many different versions of life we would live together. All we knew was that we wanted each other, and somehow that was enough to begin.
+
+Since that day we've had our beautiful moments, and we've had our difficult ones. Our ups and downs, our arguments, our misunderstandings, the days where neither of us handled things well.
+
+But through all of it, we stayed.
+
+We chose to talk things through. We chose to understand each other. We chose to forgive, to grow, and to keep trying. That's one of the things I love most about us — we didn't only stay when it was easy.
+
+We've seen every side of each other, the good and the bad, and after all of it I still look at you and think you're the person I want beside me.
+
+And now, somehow, we're here.
+
+I moved to Dubai for you.
+
+I don't think I've ever properly explained what that meant to me. It wasn't just moving somewhere else. It was choosing to bring my life closer to yours, to stop imagining our future from far away.
+
+I wanted to be someone you could actually rely on. That's something I'm still learning every single day.
+
+I'm trying to become more responsible, not just for myself but for us. The kind of man who can make good decisions, build a stable future, and stand beside you when life gets difficult.
+
+I want to be someone you can look at and think: I know he'll handle it.
+
+I'm not perfect, and I still have a lot of growing up to do. But I know I want to keep growing with you.
+
+Because when I think about the future now, I don't just think about what I want anymore.
+
+I think about us.
+
+I think about the life we could build, the places we'll go, the stupid things we'll laugh about when we're old, the home we'll make, and all the versions of ourselves we haven't met yet.
+
+I want to be your person. The one you come home to, the one you trust, who celebrates your wins, holds you through your bad days, annoys you for the rest of your life, and keeps choosing you even when things aren't perfect.
+
+When I look back at everything we've been through, I'm proud of us. Not because it was perfect, but because we never needed it to be perfect to know it was worth fighting for.
+
+We've changed, we've grown, and we've gone through things that could have pulled us apart.
+
+But they didn't. They brought us here.
+
+Two years later we're still here, still choosing each other, still building something that means more to me than I could have imagined. And I still look at you and think: I really got lucky.
+
+Happy anniversary, my love.
+
+I love you. And more than anything, I love us.
+`,
       photo: "images/20.jpg", caption: "", note: "",
     },
   ],
