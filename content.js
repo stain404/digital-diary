@@ -201,7 +201,7 @@ Your laugh is genuinely one of the cutest and best things about you. It's so con
 
 Whether you're laughing at some ridiculous joke I cracked or sitting there watching memes and laughing to yourself, your laugh always makes me happy.
 
-I love that I can hear the difference between your little laughs, your proper laughs, and the ones where you completely lose it. And hearing you laugh because of something I said might be one of my favourite feelings ever.
+And hearing you laugh because of something I said might be one of my favourite feelings ever.
 ` },
     { heading: "The things she does",    body: `
 I love when you get completely immersed in a game and start moving along with the character on screen, tongue out. You get so into it, and it's adorable.
