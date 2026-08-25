@@ -388,17 +388,17 @@ button{ font:inherit; color:inherit; cursor:pointer; }
 
 /* ---------- DIY: pull-out card ------------------------- */
 .pull-page{ flex:1; display:grid; place-items:center; }
-.pullcard{ position:relative; width:86%; aspect-ratio:1/1.24; }
+.pullcard{ position:relative; width:74%; aspect-ratio:1/1.5; }
 .pullcard::after{
-  content:""; position:absolute; left:0; right:0; top:34%; height:2px; z-index:3;
+  content:""; position:absolute; left:0; right:0; top:52%; height:2px; z-index:3;
   background:rgba(128,108,85,.4);
 }
 .pullcard__card{
-  position:absolute; left:9%; right:9%; top:30%; height:66%; z-index:1;
+  position:absolute; left:8%; right:8%; top:48%; height:50%; z-index:1;
   background:linear-gradient(#FFFCF3,#F3E9D5);
   box-shadow:0 6px 16px -8px rgba(0,0,0,.6);
   /* the message sits at the top, so it is what emerges from the slot */
-  display:grid; align-content:start; justify-items:center; text-align:center; padding:5% 9% 0;
+  display:grid; grid-template-rows:1fr auto; gap:3%; text-align:center; padding:5% 7%;
   transition:transform .45s cubic-bezier(.3,1.1,.4,1);
   will-change:transform;
 }
@@ -409,21 +409,21 @@ button{ font:inherit; color:inherit; cursor:pointer; }
   position:absolute; inset:0; z-index:2;
   background:linear-gradient(158deg,#FFFDF6,#F0E5CF);
   box-shadow:0 12px 26px -14px rgba(0,0,0,.65), inset 0 0 0 1px rgba(128,108,85,.25);
-  clip-path:polygon(0 34%,100% 34%,100% 100%,0 100%);
+  clip-path:polygon(0 52%,100% 52%,100% 100%,0 100%);
   pointer-events:none;
 }
 .pullcard__tab{
-  position:absolute; left:50%; top:34%; z-index:4;
+  position:absolute; left:50%; top:52%; z-index:4;
   transform:translate(-50%,-50%);
   font-family:var(--f-type); font-size:.58em; letter-spacing:.2em; text-transform:uppercase;
   color:var(--ink-soft); background:#FFFDF6; padding:.5em 1em;
   box-shadow:0 2px 6px rgba(0,0,0,.18);
   pointer-events:none;
 }
-.pullcard.out .pullcard__card{ transform:translateY(-45%); }
+.pullcard.out .pullcard__card{ transform:translateY(-88%); }
 .pullcard.out .pullcard__tab{ opacity:0; transition:opacity .3s; }
 .pullcard__grab{
-  position:absolute; left:9%; right:9%; top:6%; height:36%; z-index:5;
+  position:absolute; left:8%; right:8%; top:30%; height:30%; z-index:5;
   cursor:grab; touch-action:none;
 }
 .pullcard__grab:active{ cursor:grabbing; }
@@ -547,7 +547,7 @@ button{ font:inherit; color:inherit; cursor:pointer; }
   display:grid; place-items:center;
 }
 .flapbox__flap span{
-  font-family:var(--f-marker); font-size:.85em; color:var(--marker);
+  font-family:var(--f-marker); font-size:.72em; color:var(--marker); line-height:1.75;
   transform:rotate(-3.5deg); text-align:center; padding:0 8%;
 }
 .flapbox.open .flapbox__flap{ transform:rotateX(-162deg); }
@@ -559,44 +559,6 @@ button{ font:inherit; color:inherit; cursor:pointer; }
     repeating-linear-gradient(135deg, rgba(255,255,255,.34) 0 5px, transparent 5px 11px),
     var(--red);
   opacity:.82; clip-path:var(--torn); box-shadow:0 2px 5px rgba(0,0,0,.22);
-}
-
-/* ===========================================================
-   DIY: the wheel
-   =========================================================== */
-.wheel-page{ flex:1; display:grid; grid-template-rows:1fr auto; place-items:center; gap:2cqh; }
-.wheel{ position:relative; width:min(100%, 62cqh); aspect-ratio:1; }
-.wheel__disc{
-  position:absolute; inset:0; border-radius:50%; cursor:grab; touch-action:none;
-  background:
-    repeating-conic-gradient(from 0deg, rgba(128,108,85,.09) 0 15deg, transparent 15deg 30deg),
-    radial-gradient(circle, #FBF5E6 38%, #EFE3C9 70%, #DFCFAC 100%);
-  box-shadow:0 8px 20px -10px rgba(0,0,0,.6), inset 0 0 0 1px rgba(128,108,85,.4);
-  transition:transform .45s cubic-bezier(.2,1.1,.4,1);
-}
-.wheel__disc:active{ cursor:grabbing; }
-.wheel__disc i{
-  position:absolute; inset:0; display:flex; justify-content:center;
-  padding-top:5%; font-style:normal;
-  font-family:var(--f-type); font-size:.62em; letter-spacing:.12em;
-  text-transform:uppercase; color:var(--ink-soft);
-}
-.wheel__disc i.on{ color:var(--red); font-weight:700; }
-.wheel__hub{
-  position:absolute; left:50%; top:50%; width:16%; aspect-ratio:1;
-  transform:translate(-50%,-50%); border-radius:50%; z-index:2;
-  background:radial-gradient(circle at 34% 30%, #D1584E, #8E2A22 72%);
-  box-shadow:0 3px 8px rgba(0,0,0,.45);
-}
-.wheel__mark{
-  position:absolute; left:50%; top:-1.6cqh; transform:translateX(-50%);
-  width:0; height:0; z-index:3;
-  border-left:1.5cqh solid transparent; border-right:1.5cqh solid transparent;
-  border-top:2.4cqh solid var(--red);
-}
-.wheel__out{
-  margin:0; text-align:center; font-family:var(--f-hand);
-  font-size:1.35em; line-height:1.3; color:var(--hand); min-height:3.6em;
 }
 
 /* ===========================================================
@@ -674,7 +636,7 @@ button{ font:inherit; color:inherit; cursor:pointer; }
    across the paper.
    =========================================================== */
 .book{ -webkit-user-select:none; user-select:none; }
-.wheel, .film, .pullcard, .flapbox, .scratch, .foldout, .promise, .slip, .stickers{
+.film, .pullcard, .flapbox, .scratch, .foldout, .promise, .slip, .stickers{
   -webkit-user-select:none; user-select:none;
 }
 
@@ -684,3 +646,12 @@ button{ font:inherit; color:inherit; cursor:pointer; }
 /* the pressed heart on a binding endpaper */
 .endpaper{ flex:1; display:grid; place-items:center; }
 .endpaper svg{ width:7cqh; color:rgba(190,58,48,.3); transform:rotate(-8deg); }
+
+/* the photo that rides out of the pocket */
+.pullcard__photo{ min-height:0; overflow:hidden; background:#E2D6BE; }
+.pullcard__photo img, .pullcard__photo .ph{ width:100%; height:100%; object-fit:cover; }
+.pullcard__photo .ph{ border:none; font-size:1.7cqh; }
+
+/* crayon flowers on the flap */
+.crayon{ position:absolute; top:8%; left:50%; transform:translateX(-50%); width:74%; }
+.flapbox__flap span{ position:relative; margin-top:22%; }

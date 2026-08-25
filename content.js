@@ -232,12 +232,10 @@ And you've taught me how much happiness can come from the smallest things. A hug
     envelopeNote: "Click to break the seal",
     salutation: "Bisma,",
     paragraphs: [
-      "Just in case you forgot.",
-      "You're my favourite person — not the version everyone else gets. The one who talks like a baby when she's comfortable, who plays with her tongue out, whose back somehow became my job.",
-      "I know your little laughs from the ones where you completely lose it.",
-      "You put your walls down slowly. I have never taken that for granted.",
-      "You're everything I want. Even on the days we're annoyed. Even on the days we don't talk.",
-      "That's my girl.",
+      "I honestly don't know how to put everything I feel for you into words, but I want you to know that I love you more than you probably realise.",
+      "You're my favourite person, my comfort, and someone I never want to lose.",
+      "We've been through a lot, but through everything, I still look at you and feel so lucky that I get to call you mine.",
+      "I just hope I can keep making you happy, taking care of you, annoying you, and loving you for a very, very long time.",
     ],
     signoff: "Yours,",
     signature: "Zaeem",
@@ -258,42 +256,25 @@ And you've taught me how much happiness can come from the smallest things. A hug
   /* --- DIY: the pull-out card ------------------------- */
   pullCard: {
     hint: "Pull the card out",
-    front: "Open me",
-    message: "[Short. It has to land in one breath.]",
+    front: "Pull me",
+    photo: "images/19.jpg",
+    message: "and suddenly it was all about you",
   },
 
   /* --- DIY: the scratch card -------------------------- */
   scratch: {
     label: "Scratch it",
     hint: "Rub it off with your finger.",
-    message: "[One sentence. The one you actually mean.]",
+    message: "Everything has been better with you. Everything has been better since you.",
   },
 
   /* --- DIY: lift the flap ----------------------------- */
   flap: {
     hint: "Lift the flap",
-    front: "Don't look yet",
+    front: "for my favourite girl, I love you",
     photo: "images/13.jpg",
-    message: "[What's underneath. Keep it to a line.]",
+    message: "",
   },
-
-  /* --- DIY: the wheel --------------------------------- */
-  wheelTitle: "Spin the year",
-  wheelHint: "Drag it round.",
-  wheel: [
-    { label: "Jan", text: "[What happened in January.]" },
-    { label: "Feb", text: "[February.]" },
-    { label: "Mar", text: "[March.]" },
-    { label: "Apr", text: "[April.]" },
-    { label: "May", text: "[May.]" },
-    { label: "Jun", text: "[June.]" },
-    { label: "Jul", text: "[July.]" },
-    { label: "Aug", text: "[August — the month it all started.]" },
-    { label: "Sep", text: "[September.]" },
-    { label: "Oct", text: "[October.]" },
-    { label: "Nov", text: "[November — the month we met.]" },
-    { label: "Dec", text: "[December.]" },
-  ],
 
   /* --- DIY: the film strip ---------------------------- */
   filmTitle: "The negatives",

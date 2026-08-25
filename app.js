@@ -84,6 +84,36 @@
       <img src="${esc(src)}" data-slot alt="${esc(caption || `${D.me} and ${D.her}`)}" loading="lazy">${cap}</figure>`;
   }
 
+  /* Flowers drawn in crayon: a displacement filter roughens the strokes so
+     the edges wobble the way wax does instead of reading as clean vector. */
+  function crayonFlowers() {
+    const petals = (fill) => Array.from({ length: 5 }, (_, i) =>
+      `<ellipse cx="0" cy="-11" rx="6.5" ry="11" fill="${fill}" transform="rotate(${i * 72})"/>`).join('');
+    const bloom = (x, y, scale, petal, heart) => `
+      <g transform="translate(${x},${y}) scale(${scale})">
+        <path d="M0 10 C -3 30, 3 44, 0 58" stroke="#7E8C67" stroke-width="3.4" fill="none"/>
+        <path d="M0 34 C -13 27, -20 34, -15 41 C -8 45, -2 39, 0 35 Z" fill="#7E8C67"/>
+        <path d="M0 44 C 12 38, 19 45, 14 51 C 7 55, 2 49, 0 45 Z" fill="#8E9B77"/>
+        ${petals(petal)}
+        <circle r="5.5" fill="${heart}"/>
+      </g>`;
+    return `
+      <svg class="crayon" viewBox="0 0 220 150" aria-hidden="true">
+        <defs>
+          <filter id="crayonRough" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" seed="7" result="n"/>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="2.4"
+                               xChannelSelector="R" yChannelSelector="G"/>
+          </filter>
+        </defs>
+        <g filter="url(#crayonRough)">
+          ${bloom(46, 44, 1, '#BE3A30', '#E3A32B')}
+          ${bloom(112, 30, 0.78, '#D98A94', '#E3A32B')}
+          ${bloom(170, 50, 0.92, '#E3A32B', '#BE3A30')}
+        </g>
+      </svg>`;
+  }
+
   /* a plain image, for the frames that aren't polaroids */
   const bareImg = (src, alt) => src
     ? `<img src="${esc(src)}" data-slot alt="${esc(alt || `${D.me} and ${D.her}`)}" loading="lazy">`
@@ -256,7 +286,10 @@
       <p class="eyebrow">${esc(D.pullCard.hint)}</p>
       <div class="pull-page">
         <div class="pullcard" id="pullcard">
-          <div class="pullcard__card"><p>${esc(D.pullCard.message)}</p></div>
+          <div class="pullcard__card">
+            <div class="pullcard__photo">${bareImg(D.pullCard.photo, D.pullCard.message)}</div>
+            <p>${esc(D.pullCard.message)}</p>
+          </div>
           <!-- hearts live inside the pocket so its clip keeps them off the card -->
           <div class="pullcard__pocket"><div class="hearts" aria-hidden="true">${scatter(9, 31)}</div></div>
           <span class="pullcard__tab">${esc(D.pullCard.front)}</span>
@@ -280,29 +313,15 @@
       <div class="flap-page">
         <div class="flapbox" id="flapbox">
           <div class="flapbox__under">
-            ${bareImg(D.flap.photo, D.flap.message)}
-            <p class="flapbox__msg">${esc(D.flap.message)}</p>
+            ${bareImg(D.flap.photo, D.flap.front)}
+            ${D.flap.message ? `<p class="flapbox__msg">${esc(D.flap.message)}</p>` : ''}
           </div>
           <div class="flapbox__flap" id="flapLift" role="button" tabindex="0" aria-label="Lift the flap">
+            ${crayonFlowers()}
             <span>${esc(D.flap.front)}</span>
           </div>
         </div>
       </div>`);
-    add('The wheel', `
-      <p class="eyebrow">${esc(D.wheelTitle)}</p>
-      <div class="wheel-page">
-        <div class="wheel" id="wheel">
-          <div class="wheel__mark" aria-hidden="true"></div>
-          <div class="wheel__disc" id="wheelDisc" role="slider" tabindex="0"
-               aria-label="Spin to a month" aria-valuemin="1" aria-valuemax="${D.wheel.length}" aria-valuenow="1">
-            ${D.wheel.map((w, i) =>
-              `<i style="transform:rotate(${(i * 360 / D.wheel.length).toFixed(2)}deg)">${esc(w.label)}</i>`).join('')}
-          </div>
-          <div class="wheel__hub" aria-hidden="true"></div>
-        </div>
-        <p class="wheel__out" id="wheelOut">${esc(D.wheelHint)}</p>
-      </div>`);
-
     /* DIY: the film strip, then the fold-out */
     add('The negatives', `
       <p class="eyebrow">${esc(D.filmTitle)} &middot; ${esc(D.filmHint)}</p>
@@ -481,7 +500,7 @@
      Turning. Anything you can actually use is off limits —
      a drag across the scratch card must not turn the page.
      ------------------------------------------------------- */
-  const LIVE = 'button, a, canvas, input, .env__body, .polaroid[data-full], .pullcard, .film, .wheel, .flapbox, .promise, .no-turn';
+  const LIVE = 'button, a, canvas, input, .env__body, .polaroid[data-full], .pullcard, .film, .flapbox, .promise, .no-turn';
   const isLive = (t) => !!(t && t.closest && t.closest(LIVE));
 
   const dirFromX = (clientX) => {
@@ -536,7 +555,7 @@
      The DIYs. State lives out here so it survives a re-mount.
      ------------------------------------------------------- */
   let sealBroken = false, scratched = false, cardOut = false, jarPool = [];
-  let flapOpen = false, foldOpen = false, wheelRot = 0, wheelTouched = false, filmX = 0;
+  let flapOpen = false, foldOpen = false, filmX = 0;
   const ticked = new Set(load('diary.promises'));
 
   function load(key) {
@@ -552,7 +571,6 @@
     initScratch();
     initJar();
     initFlap();
-    initWheel();
     initFilm();
     initFoldout();
     initPromises();
@@ -568,58 +586,6 @@
     flap.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
     });
-  }
-
-  /* the dial you spin to a month */
-  function initWheel() {
-    const disc = $('#wheelDisc'), out = $('#wheelOut');
-    if (!disc) return;
-    const n = D.wheel.length, step = 360 / n;
-    const centre = () => {
-      const r = disc.getBoundingClientRect();
-      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-    };
-    const angleAt = (e, c) => Math.atan2(e.clientY - c.y, e.clientX - c.x) * 180 / Math.PI;
-    const selected = () => ((Math.round(-wheelRot / step) % n) + n) % n;
-
-    const render = (settled) => {
-      disc.style.transition = settled ? '' : 'none';
-      disc.style.transform = `rotate(${wheelRot}deg)`;
-      const i = selected();
-      $$('#wheelDisc i').forEach((el, k) => el.classList.toggle('on', k === i));
-      disc.setAttribute('aria-valuenow', i + 1);
-      disc.setAttribute('aria-valuetext', D.wheel[i].label);
-      if (settled) out.textContent = wheelTouched ? D.wheel[i].text : D.wheelHint;
-    };
-
-    let drag = null;
-    disc.addEventListener('pointerdown', (e) => {
-      const c = centre();
-      drag = { grip: angleAt(e, c) - wheelRot, c };
-      disc.setPointerCapture(e.pointerId);
-    });
-    disc.addEventListener('pointermove', (e) => {
-      if (!drag) return;
-      wheelRot = angleAt(e, drag.c) - drag.grip;
-      wheelTouched = true;
-      render(false);
-    });
-    const settle = () => {
-      if (!drag) return;
-      drag = null;
-      wheelRot = Math.round(wheelRot / step) * step;   // snap to the nearest month
-      render(true);
-    };
-    disc.addEventListener('pointerup', settle);
-    disc.addEventListener('pointercancel', settle);
-    disc.addEventListener('keydown', (e) => {
-      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-      e.preventDefault();
-      wheelTouched = true;
-      wheelRot += e.key === 'ArrowRight' ? -step : step;
-      render(true);
-    });
-    render(true);
   }
 
   /* the strip of negatives you drag along */
