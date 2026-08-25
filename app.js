@@ -105,7 +105,12 @@
     const pages = [];
     const add = (label, html, opts = {}) => pages.push({ label, html, ...opts });
     const blank = () => add('', '', { plain: true });
-    const evenUp = () => { if (pages.length % 2 === 0) blank(); };  // next page lands on the left
+    // A page that has to exist for the binding to work out. A small pressed
+    // heart makes it read as a deliberate endpaper rather than a gap.
+    const endpaper = () => add('', '<div class="endpaper" aria-hidden="true">' +
+      '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-8-5.1-8-10.4' +
+      'A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 8 3.6C20 15.9 12 21 12 21z"/></svg></div>',
+      { plain: true });
 
     // Little marker hearts, scattered but kept clear of `avoid` (the lettering).
     const scatter = (n, seed, avoid) => {
@@ -159,7 +164,6 @@
 
     /* the story — a photo, then as many pages as the writing needs */
     D.chapters.forEach((c, i) => {
-      evenUp();
       const tape = ['taped--red', 'taped--sage', '', 'taped--red'][i % 4];
       add(c.title, `<div class="photo-page"><div class="taped ${tape}">${polaroid(c.photo, c.caption)}</div></div>`);
 
@@ -181,7 +185,6 @@
       const head = D.essay.heading ? `<h2 class="h">${esc(D.essay.heading)}</h2>` : '';
       const cont = D.essay.heading ? `<p class="eyebrow">${esc(D.essay.heading)} &middot; continued</p>` : '';
       paginate(body, head, cont).forEach((sheet, i) => {
-        if (i === 0) evenUp();
         add(D.essay.heading || 'The long one',
           `${sheet.head}<div class="note">${sheet.paras.map((x) => `<p>${esc(x)}</p>`).join('')}</div>`,
           { fit: true });
@@ -190,7 +193,6 @@
 
     /* the writing pages */
     (D.notes || []).forEach((n, i) => {
-      if (i === 0) evenUp();
       const head = n.heading ? `<h2 class="h">${esc(n.heading)}</h2>` : '';
       const cont = n.heading ? `<p class="eyebrow">${esc(n.heading)} &middot; continued</p>` : '';
       paginate(n.body, head, cont).forEach((sheet) => {
@@ -201,7 +203,6 @@
     });
 
     /* the letter */
-    evenUp();
     add('The letter', `
       <p class="eyebrow">Sealed</p>
       <div class="env-page">
@@ -224,12 +225,10 @@
 
     /* photo pages, four to a page */
     chunk(D.gallery, 4).forEach((four, i) => {
-      if (i === 0) evenUp();
       add('Photos', `<div class="grid4">${four.map((g) => polaroid(g.src, g.caption)).join('')}</div>`);
     });
 
     /* DIY: the pull-out card, then the scratch card */
-    evenUp();
     add('Pull-out card', `
       <p class="eyebrow">${esc(D.pullCard.hint)}</p>
       <div class="pull-page">
@@ -253,7 +252,6 @@
       <p style="text-align:center;margin:0"><button class="btn" id="scratchReveal">Just show me</button></p>`);
 
     /* DIY: lift the flap, then the wheel */
-    evenUp();
     add('Lift the flap', `
       <p class="eyebrow">${esc(D.flap.hint)}</p>
       <div class="flap-page">
@@ -283,7 +281,6 @@
       </div>`);
 
     /* DIY: the film strip, then the fold-out */
-    evenUp();
     add('The negatives', `
       <p class="eyebrow">${esc(D.filmTitle)} &middot; ${esc(D.filmHint)}</p>
       <div class="film-page">
@@ -303,7 +300,6 @@
       </div>`);
 
     /* DIY: the jar, then the cut-out phrases */
-    evenUp();
     add('The jar', `
       <p class="eyebrow">${esc(D.reasonsTitle)}</p>
       <div class="jar-page">
@@ -336,7 +332,6 @@
       <div class="stickers">${(D.stickers || []).map((s) => `<span>${esc(s)}</span>`).join('')}</div>`);
 
     /* the promises, the record, then the last page */
-    evenUp();
     add('Promises', `
       <p class="eyebrow">${esc(D.promisesTitle)}</p>
       <div class="promises" id="promises">
@@ -353,7 +348,10 @@
       <p class="eyebrow">${esc(D.recordTitle)}</p>
       <div class="record"><dl>${D.firsts.map((f) =>
         `<dt>${esc(f.label)}</dt><dd>${esc(f.value)}</dd>`).join('')}</dl></div>`);
-    blank();                       // an empty left page facing the end, on purpose
+    /* The ending wants to be a right-hand page, and the back board has to be
+       the very last face in the book. If parity is off, the one blank goes
+       before the ending as an endpaper — never trailing after it. */
+    if (pages.length % 2 === 1) endpaper();
     add('The end', `
       <div class="outro">
         <h2 class="h">${esc(D.outro.title)}</h2>
@@ -364,7 +362,9 @@
         </svg>
       </div>`, { fit: true });
 
-    /* back board — must land on a left-hand page */
+    /* The back board has to be a left-hand page, so it sits as the back of
+       the final leaf. One blank endpaper before it is normal in a real book;
+       blanks anywhere else in the run are not, so nothing else pads. */
     if (pages.length % 2 === 0) blank();
     add('', `<div class="hearts" aria-hidden="true">${scatter(6, 91)}</div>`, { board: true, plain: true });
 

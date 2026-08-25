@@ -679,3 +679,7 @@ button{ font:inherit; color:inherit; cursor:pointer; }
 
 /* A real page, hidden, used only to lay out text and find the page breaks. */
 .leaf.measure{ visibility:hidden; pointer-events:none; }
+
+/* the pressed heart on a binding endpaper */
+.endpaper{ flex:1; display:grid; place-items:center; }
+.endpaper svg{ width:7cqh; color:rgba(190,58,48,.3); transform:rotate(-8deg); }
