@@ -105,6 +105,9 @@
     const pages = [];
     const add = (label, html, opts = {}) => pages.push({ label, html, ...opts });
     const blank = () => add('', '', { plain: true });
+    // Each story is a unit: photo on the left, text running right-left-right.
+    // That only works if the photo starts a spread, so keep it on a left page.
+    const startLeft = () => { if (pages.length % 2 === 0) blank(); };
     // A page that has to exist for the binding to work out. A small pressed
     // heart makes it read as a deliberate endpaper rather than a gap.
     const endpaper = () => add('', '<div class="endpaper" aria-hidden="true">' +
@@ -164,6 +167,7 @@
 
     /* the story — a photo, then as many pages as the writing needs */
     D.chapters.forEach((c, i) => {
+      startLeft();
       const tape = ['taped--red', 'taped--sage', '', 'taped--red'][i % 4];
       add(c.title, `<div class="photo-page"><div class="taped ${tape}">${polaroid(c.photo, c.caption)}</div></div>`);
 
@@ -203,10 +207,13 @@
     });
 
     /* the letter */
+    // If the envelope lands on a right-hand page its letter falls on the next
+    // spread, so the envelope has to say where the letter went.
+    const letterFaces = pages.length % 2 === 1;
     add('The letter', `
       <p class="eyebrow">Sealed</p>
       <div class="env-page">
-        <div class="envelope" id="envelope">
+        <div class="envelope" id="envelope" data-faces="${letterFaces}">
           <div class="env__body" id="envBody" role="button" tabindex="0" aria-label="Open the letter">
             <div class="env__pocket"></div>
             <div class="env__flap"></div>
@@ -658,7 +665,9 @@
     const open = () => {
       sealBroken = true;
       env.classList.add('open');
-      $('#envHint').textContent = 'read it whenever you want';
+      $('#envHint').textContent = env.dataset.faces === 'true'
+        ? 'read it whenever you want'
+        : 'turn the page';
       showLetter();
     };
     body.addEventListener('click', open);
