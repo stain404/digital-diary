@@ -26,6 +26,49 @@
   const chunk = (arr, n) => arr.reduce((out, x, i) =>
     (i % n ? out[out.length - 1].push(x) : out.push([x]), out), []);
 
+  /* Split long writing into pages by actually laying it out in a hidden
+     page of the real size, rather than guessing from character counts.
+     Returns [{ head, paras }] — one entry per page. */
+  const MEASURE_LEAF = '<div class="leaf measure" aria-hidden="true"><div class="face">' +
+    '<div class="page page--recto"><div class="page__body"></div></div></div></div>';
+
+  const SPLIT_RE = /\n\s*\n/;      // a blank line starts a new paragraph
+  function paginate(text, headHTML, contHTML) {
+    const parts = String(text || '').split(SPLIT_RE).map((x) => x.trim()).filter(Boolean);
+    if (!parts.length) return [{ head: headHTML, paras: [] }];
+
+    const bodyEl = host && host.querySelector('.measure .page__body');
+    if (!bodyEl) return [{ head: headHTML, paras: parts }];   // nothing to measure into
+
+    const sheets = [];
+    let head = headHTML, cur = [];
+    const reset = (h) => {
+      bodyEl.innerHTML = h + '<div class="note"></div>';
+      const note = bodyEl.querySelector('.note');
+      note.style.flex = '0 0 auto';        // must not stretch, or it always "fits"
+      return note;
+    };
+    let note = reset(head);
+
+    parts.forEach((para) => {
+      const el = document.createElement('p');
+      el.textContent = para;
+      note.appendChild(el);
+      if (cur.length && bodyEl.scrollHeight > bodyEl.clientHeight + 1) {
+        note.removeChild(el);              // it didn't fit: start the next page with it
+        sheets.push({ head, paras: cur });
+        head = contHTML; cur = [];
+        note = reset(head);
+        const again = document.createElement('p');
+        again.textContent = para;
+        note.appendChild(again);
+      }
+      cur.push(para);
+    });
+    sheets.push({ head, paras: cur });
+    return sheets;
+  }
+
   function polaroid(src, caption) {
     const cap = caption ? `<figcaption>${esc(caption)}</figcaption>` : '';
     if (!src) return `<figure class="polaroid"><div class="ph">Photo here<br>public/images/</div>${cap}</figure>`;
@@ -54,272 +97,279 @@
      Pages, in reading order.
      Even index = right-hand page, odd = left-hand page.
      ------------------------------------------------------- */
-  const pages = [];
-  const add = (label, html, opts = {}) => pages.push({ label, html, ...opts });
-  const blank = () => add('', '', { plain: true });
-  const evenUp = () => { if (pages.length % 2 === 0) blank(); };  // next page lands on the left
+  let pages = [];
 
-  // Little marker hearts, scattered but kept clear of `avoid` (the lettering).
-  const scatter = (n, seed, avoid) => {
-    let s = seed;
-    const rnd = () => (s = (s * 1103515245 + 12345) % 2147483648) / 2147483648;
-    const out = [];
-    for (let guard = 0; out.length < n && guard < n * 40; guard++) {
-      const x = 6 + rnd() * 88, y = 5 + rnd() * 90;
-      const rot = (rnd() * 60 - 30).toFixed(0), sc = (.6 + rnd() * .9).toFixed(2);
-      if (avoid && x > avoid[0] && x < avoid[2] && y > avoid[1] && y < avoid[3]) continue;
-      out.push(`<i style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%;transform:rotate(${rot}deg) scale(${sc})"></i>`);
-    }
-    return out.join('');
-  };
+  /* Rebuilt on every mount: pagination depends on the real page size,
+     so it has to run against a live page, not a guess. */
+  function buildPages() {
+    const pages = [];
+    const add = (label, html, opts = {}) => pages.push({ label, html, ...opts });
+    const blank = () => add('', '', { plain: true });
+    const evenUp = () => { if (pages.length % 2 === 0) blank(); };  // next page lands on the left
 
-  /* front cover */
-  add('Cover', `
-    <div class="hearts" aria-hidden="true">${scatter(12, 7, [10, 28, 90, 66])}</div>
-    <div class="cover-inner">
-      <p class="cover-kicker">${esc(D.cover.kicker)}</p>
-      <p class="cover-lettering">${esc(D.cover.lettering)}</p>
-      <p class="cover-names">${esc(D.cover.names)}</p>
-    </div>
-    <p class="cover-hint">${esc(D.cover.invitation)}</p>`, { board: true });
+    // Little marker hearts, scattered but kept clear of `avoid` (the lettering).
+    const scatter = (n, seed, avoid) => {
+      let s = seed;
+      const rnd = () => (s = (s * 1103515245 + 12345) % 2147483648) / 2147483648;
+      const out = [];
+      for (let guard = 0; out.length < n && guard < n * 40; guard++) {
+        const x = 6 + rnd() * 88, y = 5 + rnd() * 90;
+        const rot = (rnd() * 60 - 30).toFixed(0), sc = (.6 + rnd() * .9).toFixed(2);
+        if (avoid && x > avoid[0] && x < avoid[2] && y > avoid[1] && y < avoid[3]) continue;
+        out.push(`<i style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%;transform:rotate(${rot}deg) scale(${sc})"></i>`);
+      }
+      return out.join('');
+    };
 
-  /* inside the cover */
-  add('Bookplate', `
-    <div class="bookplate">
-      <span>${esc(D.bookplate.line)}</span>
-      <b>${esc(D.bookplate.name)}</b>
-      <i>${esc(D.bookplate.note)}</i>
-    </div>`);
-
-  /* the two dates */
-  add('Two dates', `
-    <p class="eyebrow">${esc(D.dates.title)}</p>
-    <div class="dates">
-      <div class="date-row">
-        <span>${esc(D.dates.metLabel)}</span>
-        <b>${longDate(D.metOn)}</b>
-        <i>${daysSince(D.metOn).toLocaleString()} days ago</i>
+    /* front cover */
+    add('Cover', `
+      <div class="hearts" aria-hidden="true">${scatter(12, 7, [10, 28, 90, 66])}</div>
+      <div class="cover-inner">
+        <p class="cover-kicker">${esc(D.cover.kicker)}</p>
+        <p class="cover-lettering">${esc(D.cover.lettering)}</p>
+        <p class="cover-names">${esc(D.cover.names)}</p>
       </div>
-      <div class="date-join">then</div>
-      <div class="date-row">
-        <span>${esc(D.dates.togetherLabel)}</span>
-        <b>${longDate(D.togetherOn)}</b>
-        <i>${daysSince(D.togetherOn).toLocaleString()} days ago</i>
+      <p class="cover-hint">${esc(D.cover.invitation)}</p>`, { board: true });
+
+    /* inside the cover */
+    add('Bookplate', `
+      <div class="bookplate">
+        <span>${esc(D.bookplate.line)}</span>
+        <b>${esc(D.bookplate.name)}</b>
+        <i>${esc(D.bookplate.note)}</i>
+      </div>`);
+
+    /* the two dates */
+    add('Two dates', `
+      <p class="eyebrow">${esc(D.dates.title)}</p>
+      <div class="dates">
+        <div class="date-row">
+          <span>${esc(D.dates.metLabel)}</span>
+          <b>${longDate(D.metOn)}</b>
+          <i>${daysSince(D.metOn).toLocaleString()} days ago</i>
+        </div>
+        <div class="date-join">then</div>
+        <div class="date-row">
+          <span>${esc(D.dates.togetherLabel)}</span>
+          <b>${longDate(D.togetherOn)}</b>
+          <i>${daysSince(D.togetherOn).toLocaleString()} days ago</i>
+        </div>
       </div>
-    </div>
-    <p class="eyebrow" style="margin:0">${esc(D.dates.footnote)}</p>`);
+      <p class="eyebrow" style="margin:0">${esc(D.dates.footnote)}</p>`);
 
-  /* the story */
-  D.chapters.forEach((c, i) => {
-    evenUp();
-    const tape = ['taped--red', 'taped--sage', '', 'taped--red'][i % 4];
-    add(c.title, `<div class="photo-page"><div class="taped ${tape}">${polaroid(c.photo, c.caption)}</div></div>`);
-    add(c.title, `
-      <p class="eyebrow">${esc(c.date)}</p>
-      <h2 class="h">${esc(c.title)}</h2>
-      ${paras(c.body)}
-      <div class="spacer"></div>
-      ${c.note ? `<p class="hand">${esc(c.note)}</p>` : ''}`, { fit: true });
-  });
+    /* the story — a photo, then as many pages as the writing needs */
+    D.chapters.forEach((c, i) => {
+      evenUp();
+      const tape = ['taped--red', 'taped--sage', '', 'taped--red'][i % 4];
+      add(c.title, `<div class="photo-page"><div class="taped ${tape}">${polaroid(c.photo, c.caption)}</div></div>`);
 
-  /* the long one — flows across as many pages as it needs */
-  (() => {
-    const body = String((D.essay && D.essay.body) || '').trim();
-    if (!body) return;
-    const parts = body.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
-    const BUDGET = 560;                        // characters that comfortably fit a page
-    const sheets = [];
-    let cur = [], len = 0;
-    parts.forEach((p) => {
-      if (len && len + p.length > BUDGET) { sheets.push(cur); cur = []; len = 0; }
-      cur.push(p); len += p.length;
+      const head = `<p class="eyebrow">${esc(c.date)}</p><h2 class="h">${esc(c.title)}</h2>`;
+      const cont = `<p class="eyebrow">${esc(c.title)} &middot; continued</p>`;
+      const sheets = paginate(c.body, head, cont);
+      sheets.forEach((sheet, k) => {
+        const last = k === sheets.length - 1;
+        add(c.title, `${sheet.head}
+          <div class="note">${sheet.paras.map((x) => `<p>${esc(x)}</p>`).join('')}</div>
+          ${last && c.note ? `<p class="hand">${esc(c.note)}</p>` : ''}`, { fit: true });
+      });
     });
-    if (cur.length) sheets.push(cur);
-    sheets.forEach((group, i) => {
+
+    /* the long one — flows across as many pages as it needs */
+    (() => {
+      const body = String((D.essay && D.essay.body) || '').trim();
+      if (!body) return;
+      const head = D.essay.heading ? `<h2 class="h">${esc(D.essay.heading)}</h2>` : '';
+      const cont = D.essay.heading ? `<p class="eyebrow">${esc(D.essay.heading)} &middot; continued</p>` : '';
+      paginate(body, head, cont).forEach((sheet, i) => {
+        if (i === 0) evenUp();
+        add(D.essay.heading || 'The long one',
+          `${sheet.head}<div class="note">${sheet.paras.map((x) => `<p>${esc(x)}</p>`).join('')}</div>`,
+          { fit: true });
+      });
+    })();
+
+    /* the writing pages */
+    (D.notes || []).forEach((n, i) => {
       if (i === 0) evenUp();
-      add(D.essay.heading || 'The long one', `
-        ${i === 0 && D.essay.heading ? `<h2 class="h">${esc(D.essay.heading)}</h2>` : ''}
-        <div class="note">${group.map((p) => `<p>${esc(p)}</p>`).join('')}</div>
-        ${sheets.length > 1 ? `<p class="eyebrow" style="margin:.9em 0 0">${i + 1} of ${sheets.length}</p>` : ''}`,
-        { fit: true });
+      const head = n.heading ? `<h2 class="h">${esc(n.heading)}</h2>` : '';
+      const cont = n.heading ? `<p class="eyebrow">${esc(n.heading)} &middot; continued</p>` : '';
+      paginate(n.body, head, cont).forEach((sheet) => {
+        add(n.heading || 'Notes',
+          `${sheet.head}<div class="note">${sheet.paras.map((x) => `<p>${esc(x)}</p>`).join('')}</div>`,
+          { fit: true });
+      });
     });
-  })();
 
-  /* the writing pages */
-  (D.notes || []).forEach((n, i) => {
-    if (i === 0) evenUp();
-    add(n.heading || 'Notes', `
-      ${n.heading ? `<h2 class="h">${esc(n.heading)}</h2>` : ''}
-      <div class="note">${paras(n.body)}</div>`, { fit: true });
-  });
-
-  /* the letter */
-  evenUp();
-  add('The letter', `
-    <p class="eyebrow">Sealed</p>
-    <div class="env-page">
-      <div class="envelope" id="envelope">
-        <div class="env__body" id="envBody" role="button" tabindex="0" aria-label="Open the letter">
-          <div class="env__pocket"></div>
-          <div class="env__flap"></div>
-          <div class="env__seal" aria-hidden="true">${esc(D.me[0])}</div>
+    /* the letter */
+    evenUp();
+    add('The letter', `
+      <p class="eyebrow">Sealed</p>
+      <div class="env-page">
+        <div class="envelope" id="envelope">
+          <div class="env__body" id="envBody" role="button" tabindex="0" aria-label="Open the letter">
+            <div class="env__pocket"></div>
+            <div class="env__flap"></div>
+            <div class="env__seal" aria-hidden="true">${esc(D.me[0])}</div>
+          </div>
+          <p class="env__hint hand" id="envHint">${esc(D.letter.envelopeNote)}</p>
         </div>
-        <p class="env__hint hand" id="envHint">${esc(D.letter.envelopeNote)}</p>
-      </div>
-    </div>`);
-  add('The letter', `
-    <div class="letter__wait" id="letterWait">Break the seal</div>
-    <div class="letter" id="letter" hidden>
-      <p>${esc(D.letter.salutation)}</p>
-      ${D.letter.paragraphs.map((p) => `<p>${esc(p)}</p>`).join('')}
-      <p class="sig">${esc(D.letter.signoff)}<br>${esc(D.letter.signature)}</p>
-    </div>`, { fit: true });
+      </div>`);
+    add('The letter', `
+      <div class="letter__wait" id="letterWait">Break the seal</div>
+      <div class="letter" id="letter" hidden>
+        <p>${esc(D.letter.salutation)}</p>
+        ${D.letter.paragraphs.map((p) => `<p>${esc(p)}</p>`).join('')}
+        <p class="sig">${esc(D.letter.signoff)}<br>${esc(D.letter.signature)}</p>
+      </div>`, { fit: true });
 
-  /* photo pages, four to a page */
-  chunk(D.gallery, 4).forEach((four, i) => {
-    if (i === 0) evenUp();
-    add('Photos', `<div class="grid4">${four.map((g) => polaroid(g.src, g.caption)).join('')}</div>`);
-  });
+    /* photo pages, four to a page */
+    chunk(D.gallery, 4).forEach((four, i) => {
+      if (i === 0) evenUp();
+      add('Photos', `<div class="grid4">${four.map((g) => polaroid(g.src, g.caption)).join('')}</div>`);
+    });
 
-  /* DIY: the pull-out card, then the scratch card */
-  evenUp();
-  add('Pull-out card', `
-    <p class="eyebrow">${esc(D.pullCard.hint)}</p>
-    <div class="pull-page">
-      <div class="pullcard" id="pullcard">
-        <div class="pullcard__card"><p>${esc(D.pullCard.message)}</p></div>
-        <!-- hearts live inside the pocket so its clip keeps them off the card -->
-        <div class="pullcard__pocket"><div class="hearts" aria-hidden="true">${scatter(9, 31)}</div></div>
-        <span class="pullcard__tab">${esc(D.pullCard.front)}</span>
-        <div class="pullcard__grab" id="pullGrab" role="button" tabindex="0"
-             aria-label="Pull the card out of the pocket"></div>
-      </div>
-    </div>`);
-  add('Scratch card', `
-    <p class="eyebrow">${esc(D.scratch.hint)}</p>
-    <div class="scratch-page">
-      <div class="scratch" id="scratch">
-        <p class="scratch__msg">${esc(D.scratch.message)}</p>
-        <canvas id="scratchCanvas" aria-label="Scratch to reveal a message"></canvas>
-      </div>
-    </div>
-    <p style="text-align:center;margin:0"><button class="btn" id="scratchReveal">Just show me</button></p>`);
-
-  /* DIY: lift the flap, then the wheel */
-  evenUp();
-  add('Lift the flap', `
-    <p class="eyebrow">${esc(D.flap.hint)}</p>
-    <div class="flap-page">
-      <div class="flapbox" id="flapbox">
-        <div class="flapbox__under">
-          ${bareImg(D.flap.photo, D.flap.message)}
-          <p class="flapbox__msg">${esc(D.flap.message)}</p>
+    /* DIY: the pull-out card, then the scratch card */
+    evenUp();
+    add('Pull-out card', `
+      <p class="eyebrow">${esc(D.pullCard.hint)}</p>
+      <div class="pull-page">
+        <div class="pullcard" id="pullcard">
+          <div class="pullcard__card"><p>${esc(D.pullCard.message)}</p></div>
+          <!-- hearts live inside the pocket so its clip keeps them off the card -->
+          <div class="pullcard__pocket"><div class="hearts" aria-hidden="true">${scatter(9, 31)}</div></div>
+          <span class="pullcard__tab">${esc(D.pullCard.front)}</span>
+          <div class="pullcard__grab" id="pullGrab" role="button" tabindex="0"
+               aria-label="Pull the card out of the pocket"></div>
         </div>
-        <div class="flapbox__flap" id="flapLift" role="button" tabindex="0" aria-label="Lift the flap">
-          <span>${esc(D.flap.front)}</span>
+      </div>`);
+    add('Scratch card', `
+      <p class="eyebrow">${esc(D.scratch.hint)}</p>
+      <div class="scratch-page">
+        <div class="scratch" id="scratch">
+          <p class="scratch__msg">${esc(D.scratch.message)}</p>
+          <canvas id="scratchCanvas" aria-label="Scratch to reveal a message"></canvas>
         </div>
       </div>
-    </div>`);
-  add('The wheel', `
-    <p class="eyebrow">${esc(D.wheelTitle)}</p>
-    <div class="wheel-page">
-      <div class="wheel" id="wheel">
-        <div class="wheel__mark" aria-hidden="true"></div>
-        <div class="wheel__disc" id="wheelDisc" role="slider" tabindex="0"
-             aria-label="Spin to a month" aria-valuemin="1" aria-valuemax="${D.wheel.length}" aria-valuenow="1">
-          ${D.wheel.map((w, i) =>
-            `<i style="transform:rotate(${(i * 360 / D.wheel.length).toFixed(2)}deg)">${esc(w.label)}</i>`).join('')}
+      <p style="text-align:center;margin:0"><button class="btn" id="scratchReveal">Just show me</button></p>`);
+
+    /* DIY: lift the flap, then the wheel */
+    evenUp();
+    add('Lift the flap', `
+      <p class="eyebrow">${esc(D.flap.hint)}</p>
+      <div class="flap-page">
+        <div class="flapbox" id="flapbox">
+          <div class="flapbox__under">
+            ${bareImg(D.flap.photo, D.flap.message)}
+            <p class="flapbox__msg">${esc(D.flap.message)}</p>
+          </div>
+          <div class="flapbox__flap" id="flapLift" role="button" tabindex="0" aria-label="Lift the flap">
+            <span>${esc(D.flap.front)}</span>
+          </div>
         </div>
-        <div class="wheel__hub" aria-hidden="true"></div>
-      </div>
-      <p class="wheel__out" id="wheelOut">${esc(D.wheelHint)}</p>
-    </div>`);
-
-  /* DIY: the film strip, then the fold-out */
-  evenUp();
-  add('The negatives', `
-    <p class="eyebrow">${esc(D.filmTitle)} &middot; ${esc(D.filmHint)}</p>
-    <div class="film-page">
-      <div class="film" id="film">
-        <div class="film__reel" id="filmReel">
-          ${(D.film || []).map((f) => `<div class="film__frame">${bareImg(f.src, f.caption)}</div>`).join('')}
+      </div>`);
+    add('The wheel', `
+      <p class="eyebrow">${esc(D.wheelTitle)}</p>
+      <div class="wheel-page">
+        <div class="wheel" id="wheel">
+          <div class="wheel__mark" aria-hidden="true"></div>
+          <div class="wheel__disc" id="wheelDisc" role="slider" tabindex="0"
+               aria-label="Spin to a month" aria-valuemin="1" aria-valuemax="${D.wheel.length}" aria-valuenow="1">
+            ${D.wheel.map((w, i) =>
+              `<i style="transform:rotate(${(i * 360 / D.wheel.length).toFixed(2)}deg)">${esc(w.label)}</i>`).join('')}
+          </div>
+          <div class="wheel__hub" aria-hidden="true"></div>
         </div>
-      </div>
-    </div>`);
-  add('Fold-out', `
-    <p class="eyebrow">${esc(D.foldout.title)} &middot; ${esc(D.foldout.hint)}</p>
-    <div class="foldout-page">
-      <div class="foldout" id="foldout">
-        ${D.foldout.panels.map((p) => `<div class="foldout__panel">${esc(p)}</div>`).join('')}
-      </div>
-      <button class="btn" id="foldBtn">${esc(D.foldout.button)}</button>
-    </div>`);
+        <p class="wheel__out" id="wheelOut">${esc(D.wheelHint)}</p>
+      </div>`);
 
-  /* DIY: the jar, then the cut-out phrases */
-  evenUp();
-  add('The jar', `
-    <p class="eyebrow">${esc(D.reasonsTitle)}</p>
-    <div class="jar-page">
-      <svg class="jar" viewBox="0 0 120 170" aria-hidden="true">
-        <defs><linearGradient id="jarGlass" x1="0" x2="1">
-          <stop offset="0" stop-color="#cfe0dc" stop-opacity=".55"/>
-          <stop offset=".45" stop-color="#eef6f4" stop-opacity=".28"/>
-          <stop offset="1" stop-color="#b9cfca" stop-opacity=".55"/>
-        </linearGradient></defs>
-        <rect x="34" y="6" width="52" height="14" rx="4" fill="#BE3A30"/>
-        <rect x="30" y="18" width="60" height="9" rx="3" fill="#8E2A22"/>
-        <path d="M22 40c0-9 8-13 8-13h60s8 4 8 13v104c0 12-8 18-18 18H40c-10 0-18-6-18-18z"
-              fill="url(#jarGlass)" stroke="#e9f2ef" stroke-opacity=".45" stroke-width="2"/>
-        <g fill="#FBF4E4" stroke="#DCCFB4">
-          <rect x="36" y="118" width="26" height="12" rx="3" transform="rotate(-12 49 124)"/>
-          <rect x="58" y="122" width="28" height="12" rx="3" transform="rotate(9 72 128)"/>
-          <rect x="42" y="134" width="30" height="12" rx="3" transform="rotate(4 57 140)"/>
-          <rect x="60" y="140" width="24" height="12" rx="3" transform="rotate(-7 72 146)"/>
-          <rect x="34" y="148" width="28" height="12" rx="3" transform="rotate(6 48 154)"/>
-        </g>
-        <path d="M32 52v92" stroke="#fff" stroke-opacity=".3" stroke-width="5" stroke-linecap="round"/>
-      </svg>
-      <div>
-        <div class="slip" id="slip">${esc(D.reasonsHint)}</div>
-        <button class="btn" id="pullBtn">Pull one out</button>
+    /* DIY: the film strip, then the fold-out */
+    evenUp();
+    add('The negatives', `
+      <p class="eyebrow">${esc(D.filmTitle)} &middot; ${esc(D.filmHint)}</p>
+      <div class="film-page">
+        <div class="film" id="film">
+          <div class="film__reel" id="filmReel">
+            ${(D.film || []).map((f) => `<div class="film__frame">${bareImg(f.src, f.caption)}</div>`).join('')}
+          </div>
+        </div>
+      </div>`);
+    add('Fold-out', `
+      <p class="eyebrow">${esc(D.foldout.title)} &middot; ${esc(D.foldout.hint)}</p>
+      <div class="foldout-page">
+        <div class="foldout" id="foldout">
+          ${D.foldout.panels.map((p) => `<div class="foldout__panel">${esc(p)}</div>`).join('')}
+        </div>
+        <button class="btn" id="foldBtn">${esc(D.foldout.button)}</button>
+      </div>`);
+
+    /* DIY: the jar, then the cut-out phrases */
+    evenUp();
+    add('The jar', `
+      <p class="eyebrow">${esc(D.reasonsTitle)}</p>
+      <div class="jar-page">
+        <svg class="jar" viewBox="0 0 120 170" aria-hidden="true">
+          <defs><linearGradient id="jarGlass" x1="0" x2="1">
+            <stop offset="0" stop-color="#cfe0dc" stop-opacity=".55"/>
+            <stop offset=".45" stop-color="#eef6f4" stop-opacity=".28"/>
+            <stop offset="1" stop-color="#b9cfca" stop-opacity=".55"/>
+          </linearGradient></defs>
+          <rect x="34" y="6" width="52" height="14" rx="4" fill="#BE3A30"/>
+          <rect x="30" y="18" width="60" height="9" rx="3" fill="#8E2A22"/>
+          <path d="M22 40c0-9 8-13 8-13h60s8 4 8 13v104c0 12-8 18-18 18H40c-10 0-18-6-18-18z"
+                fill="url(#jarGlass)" stroke="#e9f2ef" stroke-opacity=".45" stroke-width="2"/>
+          <g fill="#FBF4E4" stroke="#DCCFB4">
+            <rect x="36" y="118" width="26" height="12" rx="3" transform="rotate(-12 49 124)"/>
+            <rect x="58" y="122" width="28" height="12" rx="3" transform="rotate(9 72 128)"/>
+            <rect x="42" y="134" width="30" height="12" rx="3" transform="rotate(4 57 140)"/>
+            <rect x="60" y="140" width="24" height="12" rx="3" transform="rotate(-7 72 146)"/>
+            <rect x="34" y="148" width="28" height="12" rx="3" transform="rotate(6 48 154)"/>
+          </g>
+          <path d="M32 52v92" stroke="#fff" stroke-opacity=".3" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+        <div>
+          <div class="slip" id="slip">${esc(D.reasonsHint)}</div>
+          <button class="btn" id="pullBtn">Pull one out</button>
+        </div>
+      </div>`);
+    add('Cut-outs', `
+      <p class="eyebrow">${esc(D.stickersTitle)}</p>
+      <div class="stickers">${(D.stickers || []).map((s) => `<span>${esc(s)}</span>`).join('')}</div>`);
+
+    /* the promises, the record, then the last page */
+    evenUp();
+    add('Promises', `
+      <p class="eyebrow">${esc(D.promisesTitle)}</p>
+      <div class="promises" id="promises">
+        ${D.promises.map((p, i) => `
+          <button class="promise" type="button" aria-pressed="false" data-i="${i}">
+            <span class="promise__box" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 13l5 5L20 6"/></svg>
+            </span>
+            <span class="promise__text">${esc(p)}</span>
+          </button>`).join('')}
       </div>
-    </div>`);
-  add('Cut-outs', `
-    <p class="eyebrow">${esc(D.stickersTitle)}</p>
-    <div class="stickers">${(D.stickers || []).map((s) => `<span>${esc(s)}</span>`).join('')}</div>`);
+      <p class="eyebrow" style="margin:0">${esc(D.promisesHint)}</p>`);
+    add('The record', `
+      <p class="eyebrow">${esc(D.recordTitle)}</p>
+      <div class="record"><dl>${D.firsts.map((f) =>
+        `<dt>${esc(f.label)}</dt><dd>${esc(f.value)}</dd>`).join('')}</dl></div>`);
+    blank();                       // an empty left page facing the end, on purpose
+    add('The end', `
+      <div class="outro">
+        <h2 class="h">${esc(D.outro.title)}</h2>
+        ${paras(D.outro.body)}
+        <p class="hand">${esc(D.outro.signoff)}</p>
+        <svg class="heart" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 21s-8-5.1-8-10.4A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 8 3.6C20 15.9 12 21 12 21z"/>
+        </svg>
+      </div>`, { fit: true });
 
-  /* the promises, the record, then the last page */
-  evenUp();
-  add('Promises', `
-    <p class="eyebrow">${esc(D.promisesTitle)}</p>
-    <div class="promises" id="promises">
-      ${D.promises.map((p, i) => `
-        <button class="promise" type="button" aria-pressed="false" data-i="${i}">
-          <span class="promise__box" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M4 13l5 5L20 6"/></svg>
-          </span>
-          <span class="promise__text">${esc(p)}</span>
-        </button>`).join('')}
-    </div>
-    <p class="eyebrow" style="margin:0">${esc(D.promisesHint)}</p>`);
-  add('The record', `
-    <p class="eyebrow">${esc(D.recordTitle)}</p>
-    <div class="record"><dl>${D.firsts.map((f) =>
-      `<dt>${esc(f.label)}</dt><dd>${esc(f.value)}</dd>`).join('')}</dl></div>`);
-  blank();                       // an empty left page facing the end, on purpose
-  add('The end', `
-    <div class="outro">
-      <h2 class="h">${esc(D.outro.title)}</h2>
-      ${paras(D.outro.body)}
-      <p class="hand">${esc(D.outro.signoff)}</p>
-      <svg class="heart" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M12 21s-8-5.1-8-10.4A4.6 4.6 0 0 1 12 7a4.6 4.6 0 0 1 8 3.6C20 15.9 12 21 12 21z"/>
-      </svg>
-    </div>`, { fit: true });
+    /* back board — must land on a left-hand page */
+    if (pages.length % 2 === 0) blank();
+    add('', `<div class="hearts" aria-hidden="true">${scatter(6, 91)}</div>`, { board: true, plain: true });
 
-  /* back board — must land on a left-hand page */
-  if (pages.length % 2 === 0) blank();
-  add('', `<div class="hearts" aria-hidden="true">${scatter(6, 91)}</div>`, { board: true, plain: true });
+    return pages;
+  }
 
   /* -------------------------------------------------------
      Mounting
@@ -345,6 +395,8 @@
   };
 
   function mount() {
+    host.innerHTML = MEASURE_LEAF;   // a real, hidden page to lay text into
+    pages = buildPages();
     const per = mode === 'spread' ? 2 : 1;
     const count = Math.ceil(pages.length / per);
     let html = '';
@@ -780,5 +832,16 @@
   let t;
   addEventListener('resize', () => { clearTimeout(t); t = setTimeout(fitText, 250); });
 
+  /* Show the book straight away, then paginate again once the real fonts
+     have landed — measuring against fallback metrics breaks pages early. */
   mount();
+
+  const fonts = document.fonts;
+  if (fonts && fonts.ready) {
+    const wanted = ['400 1em "Newsreader"', '600 1em "Caveat"',
+                    '400 1em "Courier Prime"', '400 1em "Rock Salt"'];
+    Promise.all(wanted.map((f) => fonts.load(f).catch(() => {})))
+      .then(() => fonts.ready)
+      .then(() => mount());   // turned page and DIY state survive a remount
+  }
 })();

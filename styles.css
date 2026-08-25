@@ -676,3 +676,6 @@ button{ font:inherit; color:inherit; cursor:pointer; }
 .wheel, .film, .pullcard, .flapbox, .scratch, .foldout, .promise, .slip, .stickers{
   -webkit-user-select:none; user-select:none;
 }
+
+/* A real page, hidden, used only to lay out text and find the page breaks. */
+.leaf.measure{ visibility:hidden; pointer-events:none; }
