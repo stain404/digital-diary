@@ -33,7 +33,7 @@
     '<div class="page page--recto"><div class="page__body"></div></div></div></div>';
 
   const SPLIT_RE = /\n\s*\n/;      // a blank line starts a new paragraph
-  function paginate(text, headHTML, contHTML) {
+  function paginate(text, headHTML, contHTML, cls = 'note') {
     const parts = String(text || '').split(SPLIT_RE).map((x) => x.trim()).filter(Boolean);
     if (!parts.length) return [{ head: headHTML, paras: [] }];
 
@@ -43,8 +43,8 @@
     const sheets = [];
     let head = headHTML, cur = [];
     const reset = (h) => {
-      bodyEl.innerHTML = h + '<div class="note"></div>';
-      const note = bodyEl.querySelector('.note');
+      bodyEl.innerHTML = h + '<div class="' + cls + '"></div>';
+      const note = bodyEl.lastElementChild;
       note.style.flex = '0 0 auto';        // must not stretch, or it always "fits"
       return note;
     };
@@ -230,13 +230,21 @@
           <p class="env__hint hand" id="envHint">${esc(D.letter.envelopeNote)}</p>
         </div>
       </div>`);
-    add('The letter', `
-      <div class="letter__wait" id="letterWait">Break the seal</div>
-      <div class="letter" id="letter" hidden>
-        <p>${esc(D.letter.salutation)}</p>
-        ${D.letter.paragraphs.map((p) => `<p>${esc(p)}</p>`).join('')}
-        <p class="sig">${esc(D.letter.signoff)}<br>${esc(D.letter.signature)}</p>
-      </div>`, { fit: true });
+    // The letter is measured with the signature included, so the closing
+    // never gets pushed onto a page of its own.
+    const sigLine = `${D.letter.signoff} ${D.letter.signature}`;
+    const letterText = [D.letter.salutation, ...D.letter.paragraphs, sigLine].join('\n\n');
+    const letterSheets = paginate(letterText, '', '', 'letter-flow');
+    letterSheets.forEach((sheet, i) => {
+      const first = i === 0, last = i === letterSheets.length - 1;
+      const body = last ? sheet.paras.slice(0, -1) : sheet.paras;
+      add('The letter', `
+        <div class="letter__wait">${first ? 'Break the seal' : 'Still sealed'}</div>
+        <div class="letter" hidden>
+          <div class="letter-flow">${body.map((x) => `<p>${esc(x)}</p>`).join('')}</div>
+          ${last ? `<p class="sig">${esc(D.letter.signoff)}<br>${esc(D.letter.signature)}</p>` : ''}
+        </div>`, { fit: true });
+    });
 
     /* photo pages, four to a page */
     chunk(D.gallery, 4).forEach((four, i) => {
@@ -686,12 +694,14 @@
   }
 
   function showLetter(instant) {
-    const letter = $('#letter'), wait = $('#letterWait');
-    if (!letter) return;
-    wait.classList.add('gone');
-    letter.hidden = false;
-    if (instant || reduced) letter.classList.add('show');
-    else requestAnimationFrame(() => letter.classList.add('show'));
+    const letters = $$('.letter');
+    if (!letters.length) return;
+    $$('.letter__wait').forEach((w) => w.classList.add('gone'));
+    letters.forEach((letter) => {
+      letter.hidden = false;
+      if (instant || reduced) letter.classList.add('show');
+      else requestAnimationFrame(() => letter.classList.add('show'));
+    });
     fitText();
   }
 

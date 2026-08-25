@@ -184,10 +184,36 @@ I love you. And more than anything, I love us.
      `heading` can be "" if you just want to write.
   --------------------------------------------------------- */
   notes: [
-    { heading: "Her laugh",              body: "[The real one, not the polite one. When it happens, what causes it, what it does to you.]" },
-    { heading: "The things she does",    body: "[Small habits. How she eats, how she texts, how she sleeps, what she does with her hands when she's thinking.]" },
+    { heading: "Her laugh",              body: `
+Your laugh is genuinely one of the cutest and best things about you. It's so contagious and so full of expression that I can't help but smile whenever I hear it.
+
+Whether you're laughing at some ridiculous joke I cracked or sitting there watching memes and laughing to yourself, your laugh always makes me happy.
+
+I love that I can hear the difference between your little laughs, your proper laughs, and the ones where you completely lose it. And hearing you laugh because of something I said might be one of my favourite feelings ever.
+` },
+    { heading: "The things she does",    body: `
+I love when you get completely immersed in a game and start moving along with the character on screen, tongue out. You get so into it, and it's adorable.
+
+I love how expressive you are. Your face gives away exactly what you're thinking half the time, and I could sit there and watch your expressions forever.
+
+I love when you start talking like a baby, especially when you get comfortable and depend on me for little things.
+
+I love how you always ask me to massage your back, like it's automatically my job now.
+
+And I especially love when you're explaining something you're excited about and your eyes light up.
+` },
     { heading: "The first thing I noticed", body: "[Before you knew her at all.]" },
-    { heading: "What she taught me",     body: "[Things you didn't know about yourself until her.]" },
+    { heading: "What she taught me",     body: `
+You've taught me so much without even realising it.
+
+You taught me what it actually means to let someone see the real you — the vulnerable parts, the parts you're scared might not be accepted.
+
+You've taught me to be more patient, to communicate better, and to understand that loving someone isn't always knowing what to do. Sometimes it's simply staying, listening, and trying again.
+
+You've taught me that love isn't just the exciting dates and the butterflies. It's the difficult conversations, the misunderstandings, the forgiveness, the growing, and choosing each other even when things aren't easy.
+
+And you've taught me how much happiness can come from the smallest things. A hug, a stupid joke, sitting together, hearing you laugh, or just knowing you're there.
+` },
     { heading: "Her voice",              body: "[On the phone, first thing in the morning, when she's annoyed, when she's telling a story.]" },
     { heading: "The hard parts",         body: "[Every real thing has them. Write about one honestly. It'll mean more than the easy pages.]" },
     { heading: "When I knew",            body: "[The exact moment. Not when you said it — when you knew it.]" },
@@ -203,8 +229,12 @@ I love you. And more than anything, I love us.
     envelopeNote: "Click to break the seal",
     salutation: "Bisma,",
     paragraphs: [
-      "[This is the one that matters. Say it the way you'd say it out loud — not the way people write these.]",
-      "[Second paragraph if you need one.]",
+      "I want to start by saying how incredibly proud I am of you. I've watched you accomplish so many things, overcome so many things, and become the person you are today, and I genuinely think you're one of the strongest and most inspiring people I know.",
+      "I hope you know that even when we fight, even when we're annoyed at each other, even when we don't talk, you're still everything I want. I still care about you more than I can explain, and no matter what happens, my feelings for you never just disappear.",
+      "You're my favourite person. The one I want to tell everything to, the one I want around when something good happens, and the one I want around when everything is going wrong. I love you so, so much.",
+      "And I want you to know how much I appreciate you trusting me. For slowly putting your walls down and letting me get closer. I know that isn't something you do with just anyone, and I don't take it for granted.",
+      "Thank you for letting me see the parts of you that you don't show everyone. Thank you for letting me be someone you can depend on. And thank you for choosing to let me into your life and giving me the chance to love you the way I do.",
+      "I hope I can always make you feel safe enough to be completely yourself around me.",
     ],
     signoff: "Yours,",
     signature: "Zaeem",

@@ -382,7 +382,8 @@ button{ font:inherit; color:inherit; cursor:pointer; }
   text-transform:uppercase; color:rgba(128,108,85,.7); transition:opacity .4s;
 }
 .letter__wait.gone{ opacity:0; }
-.letter p{ font-family:var(--f-hand); font-size:1.42em; line-height:1.45; color:var(--hand); }
+.letter-flow{ display:block; }
+.letter p, .letter-flow p{ font-family:var(--f-hand); font-size:1.42em; line-height:1.45; color:var(--hand); }
 .letter .sig{ color:var(--red); text-align:right; }
 
 /* ---------- DIY: pull-out card ------------------------- */
