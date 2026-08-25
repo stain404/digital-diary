@@ -131,10 +131,17 @@
       return `<figure class="polaroid"><div class="ph">Photo here<br>images/</div></figure>`;
     }
     const alt = esc(caption || `${D.me} and ${D.her}`);
-    const slides = list.map((src) => `<div class="reel__item">${IS_VIDEO.test(src)
-      ? `<video src="${esc(src)}" playsinline preload="metadata"></video>
-         <span class="reel__play" aria-hidden="true"></span>`
-      : `<img src="${esc(src)}" data-slot alt="${alt}" loading="lazy">`}</div>`).join('');
+    const slide = (src, clone) => `<div class="reel__item${clone ? ' reel__item--clone' : ''}"${clone ? ' aria-hidden="true"' : ''}>${
+      IS_VIDEO.test(src)
+        ? `<video src="${esc(src)}" playsinline preload="metadata"${clone ? ' muted' : ''}></video>
+           <span class="reel__play" aria-hidden="true"></span>`
+        : `<img src="${esc(src)}" data-slot alt="${alt}" loading="lazy">`}</div>`;
+    // A copy of the last slide before the first, and of the first after the
+    // last, so wrapping around slides in the direction you swiped instead of
+    // rewinding through everything.
+    const slides = list.length > 1
+      ? slide(list[list.length - 1], true) + list.map((x) => slide(x, false)).join('') + slide(list[0], true)
+      : slide(list[0], false);
     const dots = list.length > 1
       ? `<div class="reel__dots">${list.map((_, i) =>
           `<button type="button" class="reel__dot${i ? '' : ' on'}" data-go="${i}"
@@ -238,8 +245,16 @@
     /* the story — a photo, then as many pages as the writing needs */
     D.chapters.forEach((c, i) => {
       startLeft();
-      const tape = ['taped--red', 'taped--sage', '', 'taped--red'][i % 4];
-      add(c.title, `<div class="photo-page"><div class="taped ${tape}">${mediaReel(c.media, c.caption)}</div></div>`);
+      // Hand-laid, not machine-set: every frame gets its own angle and its
+      // tape sits a little differently.
+      const tape = ['taped--red', 'taped--sage', '', 'taped--red', 'taped--sage'][i % 5];
+      const tilt = [-2.3, 1.7, -1.1, 2.4, -1.8][i % 5];
+      const lean = [`--tape-a:${[-5, -2, -6, -3, -4][i % 5]}cqw`,
+                    `--tape-b:${[-3, -6, -2, -5, -3][i % 5]}cqw`,
+                    `--tape-rot-a:${[-11, -6, -13, -8, -9][i % 5]}deg`,
+                    `--tape-rot-b:${[-7, -12, -6, -10, -8][i % 5]}deg`].join(';');
+      add(c.title, `<div class="photo-page" style="--tilt:${tilt}deg;${lean}">
+        <div class="taped ${tape}">${mediaReel(c.media, c.caption)}</div></div>`);
 
       const head = `<p class="eyebrow">${esc(c.date)}</p><h2 class="h">${esc(c.title)}</h2>`;
       const cont = `<p class="eyebrow">${esc(c.title)} &middot; continued</p>`;
@@ -536,31 +551,17 @@
   const LIVE = 'button, a, canvas, input, .env__body, .polaroid[data-full], .pullcard, .film, .flapbox, .reel, .promise, .no-turn';
   const isLive = (t) => !!(t && t.closest && t.closest(LIVE));
 
-  const dirFromX = (clientX) => {
-    if (turned === 0) return 1;                 // closed: any click opens it
-    if (turned === leaves.length) return -1;    // finished: any click goes back
-    const r = book.getBoundingClientRect();
-    return clientX < r.left + r.width / 2 ? -1 : 1;
-  };
 
+  // Only the closed cover opens on a tap. Everywhere else the buttons turn
+  // the page, so tapping a photo, a clip or a DIY can never flip it.
   book.addEventListener('click', (e) => {
-    if (isLive(e.target)) return;
-    go(dirFromX(e.clientX));
+    if (turned !== 0 || isLive(e.target)) return;
+    go(1);
   });
 
   book.addEventListener('mousemove', (e) => {
-    if (isLive(e.target)) {
-      book.classList.remove('hint-next', 'hint-prev');
-      book.style.cursor = '';
-      return;
-    }
-    const d = dirFromX(e.clientX);
-    const can = d > 0 ? turned < leaves.length : turned > 0;
-    book.classList.toggle('hint-next', can && d > 0);
-    book.classList.toggle('hint-prev', can && d < 0);
-    book.style.cursor = can ? 'pointer' : 'default';
+    book.style.cursor = (turned === 0 && !isLive(e.target)) ? 'pointer' : '';
   });
-  book.addEventListener('mouseleave', () => book.classList.remove('hint-next', 'hint-prev'));
 
   $('#next').addEventListener('click', () => go(1));
   $('#prev').addEventListener('click', () => go(-1));
@@ -610,55 +611,91 @@
     initReels();
   }
 
-  /* swipe, or tap the dots; a tap on a clip plays or pauses it */
+  /* Swipe or use the dots. A tap on a clip plays or pauses it — the slide is
+     read at pointerdown, because setPointerCapture retargets later pointer
+     events to the reel and the tapped video would never be found. */
   function initReels() {
     $$('.reel', host).forEach((reel) => {
       const track = $('.reel__track', reel);
       const n = Number(reel.dataset.n) || 1;
-      let at = 0, drag = null;
+      const looped = n > 1;
+      let pos = looped ? 1 : 0;          // track position, including the clones
+      let drag = null;
 
-      const show = (k) => {
-        at = Math.max(0, Math.min(n - 1, k));
-        track.style.transition = '';
-        track.style.transform = `translateX(${-at * 100}%)`;
-        $$('video', reel).forEach((v) => v.pause());
-        $$('.reel__dot', reel).forEach((d, j) => d.classList.toggle('on', j === at));
+      const place = (animate) => {
+        track.style.transition = animate ? '' : 'none';
+        track.style.transform = `translateX(${-pos * 100}%)`;
+        reel.dataset.pos = pos;
+      };
+      const current = () => (looped ? ((pos - 1) % n + n) % n : 0);
+      const paint = () => {
+        $$('video', reel).forEach((v) => { v.pause(); });
+        $$('.reel__item', reel).forEach((it) => it.classList.remove('playing'));
+        $$('.reel__dot', reel).forEach((d, j) => d.classList.toggle('on', j === current()));
+      };
+      const settle = () => {                 // hop off a clone onto the real slide
+        if (!looped) return;
+        if (pos === n + 1) { pos = 1; place(false); }
+        else if (pos === 0) { pos = n; place(false); }
+      };
+      track.addEventListener('transitionend', settle);
+
+      const go = (next) => {
+        pos = looped ? next : Math.max(0, Math.min(n - 1, next));
+        place(true);
+        paint();
       };
 
       reel.addEventListener('pointerdown', (e) => {
         if (e.target.closest('.reel__dot')) return;
-        drag = { x: e.clientX, y: e.clientY, w: reel.getBoundingClientRect().width };
+        settle();
+        drag = {
+          x: e.clientX, y: e.clientY,
+          w: reel.getBoundingClientRect().width,
+          slide: e.target.closest('.reel__item'),   // grabbed before capture retargets
+        };
         track.style.transition = 'none';
         reel.setPointerCapture(e.pointerId);
       });
       reel.addEventListener('pointermove', (e) => {
         if (!drag) return;
-        track.style.transform = `translateX(calc(${-at * 100}% + ${e.clientX - drag.x}px))`;
+        track.style.transform = `translateX(calc(${-pos * 100}% + ${e.clientX - drag.x}px))`;
       });
       const release = (e) => {
         if (!drag) return;
-        const dx = e.clientX - drag.x, dy = e.clientY - drag.y, w = drag.w;
+        const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+        const w = drag.w, slide = drag.slide;
         drag = null;
-        if (Math.abs(dx) < 6 && Math.abs(dy) < 6) {      // a tap, not a swipe
-          const slide = e.target.closest('.reel__item');
+
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) {          // a tap, not a swipe
+          place(true);
           const video = slide && slide.querySelector('video');
-          show(at);
           if (video) {
-            if (video.paused) { video.play().catch(() => {}); slide.classList.add('playing'); }
-            else { video.pause(); slide.classList.remove('playing'); }
+            if (video.paused) {
+              $$('video', reel).forEach((v) => { if (v !== video) v.pause(); });
+              video.play().then(() => slide.classList.add('playing')).catch(() => {});
+            } else {
+              video.pause();
+              slide.classList.remove('playing');
+            }
           }
           return;
         }
-        show(Math.abs(dx) > w * 0.18 ? at + (dx < 0 ? 1 : -1) : at);
+        if (Math.abs(dx) > w * 0.15) go(pos + (dx < 0 ? 1 : -1));
+        else place(true);
       };
       reel.addEventListener('pointerup', release);
       reel.addEventListener('pointercancel', release);
+
       $$('.reel__dot', reel).forEach((d) =>
-        d.addEventListener('click', () => show(Number(d.dataset.go))));
+        d.addEventListener('click', () => { settle(); go(Number(d.dataset.go) + (looped ? 1 : 0)); }));
       $$('video', reel).forEach((v) => {
-        v.addEventListener('pause', () => v.closest('.reel__item').classList.remove('playing'));
-        v.addEventListener('ended', () => v.closest('.reel__item').classList.remove('playing'));
+        const item = v.closest('.reel__item');
+        v.addEventListener('pause', () => item.classList.remove('playing'));
+        v.addEventListener('ended', () => item.classList.remove('playing'));
+        v.addEventListener('play', () => item.classList.add('playing'));
       });
+      place(false);
     });
   }
 
