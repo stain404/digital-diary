@@ -1,0 +1,3 @@
+# This is a private gift, not a website. Please don't index it.
+User-agent: *
+Disallow: /
