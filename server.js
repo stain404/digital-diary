@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = 3002;
-const ROOT = path.join(__dirname, 'public');
+const ROOT = __dirname;
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -29,8 +29,8 @@ http.createServer((req, res) => {
   const url = decodeURIComponent(req.url.split('?')[0]);
   let file = path.join(ROOT, url === '/' ? 'index.html' : url);
 
-  // Never serve outside public/
-  if (!file.startsWith(ROOT)) {
+  // Never serve outside the project, and never dotfiles (.git and friends)
+  if (!file.startsWith(ROOT) || /[\\/]\./.test(file.slice(ROOT.length))) {
     res.writeHead(403).end('Forbidden');
     return;
   }

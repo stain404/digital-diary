@@ -19,7 +19,7 @@ Arrow keys and swipe work too. On a phone it shows one page at a time.
 
 ## Writing it
 
-Everything you can read is in one file: **`public/content.js`**. Edit it, save,
+Everything you can read is in one file: **`content.js`**. Edit it, save,
 refresh the page. Nothing else needs touching.
 
 - `chapters` — the story, a photo on the left and your words on the right
@@ -32,7 +32,7 @@ Pages are a fixed size, so writing that runs long shrinks itself to fit.
 
 ## Photos
 
-Drop image files into **`public/images/`** and reference them by filename, e.g.
+Drop image files into **`images/`** and reference them by filename, e.g.
 `photo: "images/01.jpg"`. Any frame whose file isn't there yet shows a labelled
 empty slot instead of a broken image, so the book always looks finished.
 
@@ -54,9 +54,9 @@ empty slot instead of a broken image, so the book always looks finished.
 
 ```
 server.js            zero-dependency static server on port 3002
-public/index.html    the shell
-public/content.js    every word in the book
-public/app.js        pages, page-turning, the DIYs
-public/styles.css    the look
-public/images/       your photos go here
+index.html    the shell
+content.js    every word in the book
+app.js        pages, page-turning, the DIYs
+styles.css    the look
+images/       your photos go here
 ```
